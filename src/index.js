@@ -67,7 +67,7 @@ export default () => {
     ],
   });
   pug.use(app);
-  rollbar.log('Hello Hexlet!');
 
+  app.use(rollbar.errorHandler());
   return app;
 };

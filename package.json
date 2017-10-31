@@ -7,7 +7,7 @@
   "author": "Roman Pushkov <pushkovroman@me.com>",
   "license": "MIT",
   "scripts": {
-    "build": "npm run webpack -- -p && babel src --out-dir dist --source-maps inline",
+    "build": "npm run webpack -- -p",
     "eslint": "eslint",
     "gulp": "gulp",
     "nodemon": "nodemon",
