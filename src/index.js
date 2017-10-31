@@ -43,17 +43,6 @@ export default () => {
     }
     return null;
   }));
-  app.use(async (ctx, next) => {
-    try {
-      ctx.state = {
-        flash: ctx.flash,
-        isSignedIn: () => ctx.session.userId !== undefined,
-      };
-      await next();
-    } catch (err) {
-      rollbar.error(err, ctx.request);
-    }
-  });
   app.use(serve(path.join(__dirname, '..', 'public')));
   app.use(koaLogger());
   app.use(router.allowedMethods());
