@@ -24,6 +24,14 @@ export default () => {
   const router = new Router();
   const rollbar = new Rollbar(process.env.ROLLBAR_ACCESS_TOKEN);
 
+  app.use(async (ctx, next) => {
+    try {
+      await next();
+    } catch (err) {
+      rollbar.error(err, ctx.request);
+    }
+  });
+
   addRoutes(router, container);
 
   app.keys = ['some secret hurr'];
@@ -68,6 +76,5 @@ export default () => {
   });
   pug.use(app);
 
-  app.use(rollbar.errorHandler());
   return app;
 };
