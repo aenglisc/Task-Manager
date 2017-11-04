@@ -1,0 +1,25 @@
+- const getInputName = (f, property) => `${f.name}[${property}]`
+
+mixin formFor(f, options = {})
+  - const url = _.get(options, 'url');
+  - const method = _.get(options, 'method', 'get').toLowerCase();
+  - const isStandart = _.includes(['get', 'post'], method);
+  - const confirm = _.get(options, 'confirm');
+  form(action= url method= isStandart ? method : 'post' data-confirm= confirm)
+    if !isStandart
+      input(name='_method' type='hidden' value= method)
+    block
+
+mixin input(f, property, placeholder, options = { as: 'text', small: false })
+  - const value = (f.object[property] === undefined || options['as'] === 'password') ? '' : f.object[property]
+  - const small = _.get(options, 'small');
+  .form-group(class=(f.errors[property] && 'has-danger'))
+    input(name=getInputName(f, property) class='form-control' placeholder=`${placeholder}` type=options['as'] value=`${value}`)
+    if f.errors[property]
+      .form-control-feedback.text-danger= f.errors[property].map(({ message }) => message).join('. ')
+    if options.small 
+      small(class= 'form-text text-muted')= small
+
+mixin button(f, value = 'Save', type = 'submit')
+  .form-group
+    input(class='btn btn-block btn-primary' type=`${type}` value=`${value}`)
