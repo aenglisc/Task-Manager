@@ -1,0 +1,23 @@
+extends ../layouts/application.pug
+
+block content
+  .jumbotron
+    h1.text-center.display-1= `${user.firstName} ${user.lastName}`
+    h3.text-center= `E-mail: ${user.email}`
+    
+    .row.mt-2
+      .col-sm-6.mx-auto
+        table.table.col-md-3
+          tbody
+            tr
+              th.text-right= 'Joined'
+              th.text-left= `${user.createdAt}`
+            tr
+              th.text-right= 'Updated'
+              th.text-left= `${user.updatedAt}`
+        
+        if id === user.id
+          +formFor(user, { url: urlFor('users-edit', user.id), method: 'get' })
+            button.btn.btn-primary.btn-block.mt-2(type='submit')= 'Edit'
+          +formFor(user, { url: urlFor('users-delete', user.id), method: 'delete', confirm: `You are about to delete ${user.firstName} ${user.lastName}'s profile, are you sure?`})
+            button.btn.btn-danger.btn-block.mt-2(type='submit')= 'Delete'

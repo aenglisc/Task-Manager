@@ -1,0 +1,30 @@
+extends /layouts/application.pug
+
+block content
+  .jumbotron
+    h1.text-center.display-1
+      | Users
+    table.table.table-striped.align-middle
+      thead
+        tr
+          th.text-center First Name
+          th.text-center Last Name
+          th.text-center E-mail
+          th.text-center
+          th.text-center
+      tbody
+        each user in users
+          tr
+            td.text-center= user.firstName
+            td.text-center= user.lastName
+            td.text-center= user.email
+            td.text-right
+              +formFor(user, { url: urlFor('users-show', user.id) })
+                button.btn.btn-outline-info(type='submit')= 'View'
+            td.text.left
+              if id == user.id
+                +formFor(user, { url: urlFor('users-delete', user.id), method: 'delete', confirm: `You are about to delete ${user.firstName} ${user.lastName}'s profile, are you sure?`})
+                  button.btn.btn-outline-danger(type='submit')= 'Delete'
+              else
+                button.btn.btn-outline-secondary(type='button', disabled='') Delete
+                
