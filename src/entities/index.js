@@ -13,8 +13,8 @@ export default () => {
     process.env[config.use_env_variable] :
     config.database, config.username, config.password, config);
 
-  console.log(config.use_env_variable ? config.use_env_variable : '?'); // eslint-disable-line
-  console.log(sequelize); // eslint-disable-line
+  console.log(process.env[config.use_env_variable] ? process.env[config.use_env_variable] : '?'); // eslint-disable-line
+  // console.log(sequelize); // eslint-disable-line
 
   fs
     .readdirSync(__dirname)
