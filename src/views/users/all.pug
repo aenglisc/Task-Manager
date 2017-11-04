@@ -4,27 +4,27 @@ block content
   .jumbotron
     h1.text-center.display-1
       | Users
-    table.table.table-striped.align-middle
+    table.table.table-striped.align-middle.text-center 
       thead
         tr
-          th.text-center.align-bottom First Name
-          th.text-center Last Name
-          th.text-center E-mail
-          th.text-center
-          th.text-center
+          th First Name
+          th Last Name
+          th E-mail
+          th
+          th
       tbody
         each user in users
           tr
-            td.text-center= user.firstName
-            td.text-center= user.lastName
-            td.text-center= user.email
-            td.text-right
+            td= user.firstName
+            td= user.lastName
+            td= user.email
+            td
               +formFor(user, { url: urlFor('users-show', user.id) })
-                button.btn.btn-outline-info(type='submit')= 'View'
-            td.text.left
+                button.btn.btn-outline-info.btn-block(type='submit')= 'View'
+            td
               if id == user.id
                 +formFor(user, { url: urlFor('users-delete', user.id), method: 'delete', confirm: `You are about to delete ${user.firstName} ${user.lastName}'s profile, are you sure?`})
-                  button.btn.btn-outline-danger(type='submit')= 'Delete'
+                  button.btn.btn-outline-danger.btn-block(type='submit')= 'Delete'
               else
-                button.btn.btn-outline-secondary(type='button', disabled='') Delete
+                button.btn.btn-outline-secondary.btn-block(type='button', disabled='') Delete
                 
