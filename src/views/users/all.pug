@@ -4,7 +4,7 @@ block content
   .jumbotron
     h1.text-center.display-1
       | Users
-    table.table.table-striped.align-middle.text-center 
+    table.table.table-striped.text-center 
       thead
         tr
           th First Name
@@ -15,9 +15,9 @@ block content
       tbody
         each user in users
           tr
-            td= user.firstName
-            td= user.lastName
-            td= user.email
+            td.align-middle= user.firstName
+            td.align-middle= user.lastName
+            td.align-middle= user.email
             td
               +formFor(user, { url: urlFor('users-show', user.id) })
                 button.btn.btn-outline-info.btn-block(type='submit')= 'View'
