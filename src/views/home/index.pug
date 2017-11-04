@@ -1,0 +1,9 @@
+extends /layouts/application.pug
+
+block content
+  .jumbotron
+    if !user
+      h1.text-center.display-1= 'Welcome!'
+    else
+      h1.text-center.display-1= `Welcome, ${user.firstName}!`
+      
