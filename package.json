@@ -45,6 +45,7 @@
     "koa-static": "^4.0.1",
     "koa-webpack": "^1.0.0",
     "lodash": "^4.17.4",
+    "pg": "^7.3.0",
     "rollbar": "^2.2.10",
     "sequelize": "^4.20.1",
     "sequelize-cli": "^3.0.0",
