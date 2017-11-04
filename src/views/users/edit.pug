@@ -13,7 +13,7 @@ block content
           +input(f, 'email', 'E-mail')
           +input(f, 'firstName', 'First name')
           +input(f, 'lastName', 'Last name')
-          button.btn.btn-warning.btn-block.mt-2(type='submit')= 'Update'
+          button.btn.btn-outline-primary.btn-block.mt-2(type='submit')= 'Update'
         
         +formFor(f, { url: urlFor('users-show', f.object.id) })
-          button.btn.btn-primary.btn-block.mt-2(type='submit')= 'Go back'
+          button.btn.btn-outline-success.btn-block.mt-2(type='submit')= 'Go back'
