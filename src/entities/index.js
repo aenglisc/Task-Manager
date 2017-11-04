@@ -2,12 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import Sequelize from 'sequelize';
 
-const basename = path.basename(__filename);
-const env = process.env.NODE_ENV;
-const config = require('../../config/config.json')[env];
+import configfile from '../../config/config.json';
 
 export default () => {
   const db = {};
+
+  const basename = path.basename(__filename);
+  const env = process.env.NODE_ENV;
+  const config = configfile[env];
 
   let sequelize;
   if (config.use_env_variable) {
@@ -15,9 +17,6 @@ export default () => {
   } else {
     sequelize = new Sequelize(config.database, config.username, config.password, config);
   }
-
-  console.log(process.env[config.use_env_variable] ? process.env[config.use_env_variable] : '?'); // eslint-disable-line
-  console.log(sequelize); // eslint-disable-line
 
   fs
     .readdirSync(__dirname)
