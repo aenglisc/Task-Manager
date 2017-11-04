@@ -1,0 +1,13 @@
+extends ../layouts/application.pug
+
+block content
+  .jumbotron
+    h1.text-center.display-1
+      | Sign in
+
+    .row.mt-3
+      .col-sm-6.mx-auto
+        +formFor(f, { url: urlFor('sessions-start'), method: 'post' })
+          +input(f, 'email', 'E-mail')
+          +input(f, 'password', 'Password', { as: 'password' })
+          +button(f, 'Sign in')
