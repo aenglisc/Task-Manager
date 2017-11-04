@@ -4,6 +4,9 @@ install:
 start:
 	yarn start
 
+db:
+	yarn sequelize db:migrate
+
 debug:
 	DEBUG="app" yarn nodemon -- --watch src -e js,pug --exec yarn gulp server
 
