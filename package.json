@@ -10,10 +10,9 @@
     "build": "npm run webpack -- -p",
     "eslint": "eslint",
     "gulp": "gulp",
-    "init": "gulp init",
     "nodemon": "nodemon",
     "sequelize": "sequelize",
-    "start": "gulp server",
+    "start": "gulp init server",
     "test": "jest",
     "webpack": "webpack"
   },
