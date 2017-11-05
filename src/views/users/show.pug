@@ -17,7 +17,7 @@ block content
               th.text-left= `${user.updatedAt}`
         
         if id === user.id
-          +formFor(user, { url: urlFor('users-edit', user.id), method: 'get' })
+          +formFor(user, { url: urlFor('users#update', user.id), method: 'get' })
             button.btn.btn-outline-primary.btn-block.mt-2(type='submit')= 'Edit'
-          +formFor(user, { url: urlFor('users-delete', user.id), method: 'delete', confirm: `You are about to delete ${user.firstName} ${user.lastName}'s profile, are you sure?`})
+          +formFor(user, { url: urlFor('users#destroy', user.id), method: 'delete', confirm: `You are about to delete ${user.firstName} ${user.lastName}'s profile, are you sure?`})
             button.btn.btn-outline-danger.btn-block.mt-2(type='submit')= 'Delete'

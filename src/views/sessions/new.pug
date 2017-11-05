@@ -7,7 +7,7 @@ block content
 
     .row.mt-3
       .col-sm-6.mx-auto
-        +formFor(f, { url: urlFor('sessions-start'), method: 'post' })
+        +formFor(f, { url: urlFor('sessions#create'), method: 'post' })
           +input(f, 'email', 'E-mail')
           +input(f, 'password', 'Password', { as: 'password' })
           +button(f, 'Sign in')

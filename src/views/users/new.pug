@@ -7,7 +7,7 @@ block content
 
     .row.mt-3
       .col-sm-6.mx-auto
-        +formFor(f, { url: urlFor('users-create'), method: 'post' })
+        +formFor(f, { url: urlFor('users#create'), method: 'post' })
           +input(f, 'email', 'E-mail')
           +input(f, 'firstName', 'First name')
           +input(f, 'lastName', 'Last name')

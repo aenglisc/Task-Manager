@@ -1,0 +1,28 @@
+extends /layouts/application.pug
+
+block content
+  .jumbotron
+    h1.text-center.display-1
+      | Tasks
+
+    if id
+      .row.mt-2
+        .col-sm-6.mx-auto
+          +formFor(user, { url: urlFor('tasks#new'), method: 'get' })
+            button.btn.btn-outline-primary.btn-block.mt-2(type='submit')= 'Create a new task'
+
+    table.table.table-striped.text-center 
+      thead
+        tr
+          th Task
+          th Created by
+          th Assigned to
+          th Status
+          th Tags
+      tbody
+        tr
+          td
+          td
+          td
+          td
+          td
