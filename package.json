@@ -12,7 +12,7 @@
     "gulp": "gulp",
     "nodemon": "nodemon",
     "sequelize": "sequelize",
-    "start": "gulp init server",
+    "start": "gulp server",
     "test": "jest",
     "webpack": "webpack"
   },
