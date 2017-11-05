@@ -1,25 +1,18 @@
-import buildFormObj from '../lib/formObjectBuilder';
+// import buildFormObj from '../lib/formObjectBuilder';
 
 export default (router, {
   logger,
   User,
-  Task,
-  Tag,
-  TaskTag,
-  TaskStatus,
+  // Task,
+  // Tag,
+  // TaskTag,
+  // TaskStatus,
 }) => {
   router
     .get('tasks#index', '/tasks', async (ctx) => {
       logger('GET /tasks || All tasks page');
-      const { query } = ctx.request;
-      logger('query', query);
-      logger(Task);
-      logger('User', User);
+      // const { query } = ctx.request;
       const users = await User.findAll();
-      const tasks = await Task.findAll();
-      const tags = await Tag.findAll();
-      const tasktags = await TaskTag.findAll();
-      const taskstatus = await TaskStatus.findAll();
       ctx.render('tasks/index', { users });
     })
 
