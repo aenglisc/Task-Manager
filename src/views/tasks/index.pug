@@ -9,7 +9,7 @@ block content
       .row.mt-2
         .col-sm-6.mx-auto
           +formFor(user, { url: urlFor('tasks#new'), method: 'get' })
-            button.btn.btn-outline-primary.btn-block.mt-2(type='submit')= 'Create a new task'
+            button.btn.btn-outline-primary.btn-block.mt-2.mb-2(type='submit')= 'Create a new task'
 
     table.table.table-striped.text-center 
       thead
@@ -20,9 +20,17 @@ block content
           th Status
           th Tags
       tbody
-        tr
-          td
-          td
-          td
-          td
-          td
+        each task in tasks
+          tr
+            td
+              +formFor(user, { url: urlFor('tasks#show', task.id), method: 'get' })
+                button.btn.btn-outline-info.btn-block(type='submit')= `${task.name}`
+            td.align-middle= task.creator.fullName
+            td.align-middle= task.assignedTo.fullName
+            td.align-middle= task.status.name
+            td.align-middle
+              row
+                each tag in task.Tags
+                  .d-inline
+                    span
+                      kbd.py-0.my-1= tag.name

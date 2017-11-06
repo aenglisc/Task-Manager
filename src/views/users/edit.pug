@@ -10,9 +10,9 @@ block content
     .row.mt-2
       .col-sm-6.mx-auto
         +formFor(f, { url: urlFor('users#update', f.object.id), method: 'patch'})
-          +input(f, 'email', 'E-mail')
-          +input(f, 'firstName', 'First name')
-          +input(f, 'lastName', 'Last name')
+          +input(f, 'email', 'Input your e-mail')
+          +input(f, 'firstName', 'Input your first name')
+          +input(f, 'lastName', 'Input your last name')
           button.btn.btn-outline-primary.btn-block.mt-2(type='submit')= 'Update'
         
         +formFor(f, { url: urlFor('users#show', f.object.id) })

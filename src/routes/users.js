@@ -64,31 +64,39 @@ export default (router, { logger, User }) => {
       }
     })
 
-    .patch('users#update', '/users/:id/edit', async (ctx) => {
+    .patch('users#update', '/users/:id', async (ctx) => {
       logger('PATCH /users || Editing user info');
-      const { form } = ctx.request.body;
-      const user = await User.findById(ctx.params.id);
-      const { firstName, lastName } = user;
-      try {
-        await user.update(form, { where: { id: ctx.params.id } });
-        logger('PATCH /users || User info has been successfully edited');
-        ctx.state.flash = {
-          get: () => ({
-            type: 'success',
-            text: 'User info has been successfully edited',
-          }),
-        };
-        ctx.render('users/edit', { user, f: buildFormObj(user) });
-      } catch (err) {
-        logger('PATCH /users || Error encountered', err);
-        ctx.state.flash = {
-          get: () => ({
-            type: 'danger',
-            text: 'Unable to edit user info',
-          }),
-        };
-        ctx.render('users/edit', { firstName, lastName, f: buildFormObj(user, err) });
-        ctx.response.status = 422;
+      if (ctx.state.id === ctx.params.id) {
+        const { form } = ctx.request.body;
+        const user = await User.findById(ctx.params.id);
+        const { firstName, lastName } = user;
+        try {
+          await user.update(form, { where: { id: ctx.params.id } });
+          logger('PATCH /users || User info has been successfully edited');
+          ctx.state.flash = {
+            get: () => ({
+              type: 'success',
+              text: 'User info has been successfully edited',
+            }),
+          };
+          ctx.render('users/edit', { user, f: buildFormObj(user) });
+        } catch (err) {
+          logger('PATCH /users || Error encountered', err);
+          ctx.state.flash = {
+            get: () => ({
+              type: 'danger',
+              text: 'Unable to edit user info',
+            }),
+          };
+          ctx.render('users/edit', { firstName, lastName, f: buildFormObj(user, err) });
+          ctx.response.status = 422;
+        }
+      } else {
+        ctx.flash.set({
+          type: 'danger',
+          text: 'A profile can only be edited by its owner',
+        });
+        ctx.redirect(router.url('users#show', ctx.params.id));
       }
     })
 

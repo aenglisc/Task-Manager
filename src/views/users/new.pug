@@ -8,8 +8,8 @@ block content
     .row.mt-3
       .col-sm-6.mx-auto
         +formFor(f, { url: urlFor('users#create'), method: 'post' })
-          +input(f, 'email', 'E-mail')
-          +input(f, 'firstName', 'First name')
-          +input(f, 'lastName', 'Last name')
-          +input(f, 'password', 'Password', { as: 'password' })
+          +input(f, 'email', 'Input your e-mail')
+          +input(f, 'firstName', 'Input your first name')
+          +input(f, 'lastName', 'Input your last name')
+          +input(f, 'password', 'Input a password, at least 3 symbols long', { as: 'password' })
           +button(f, 'Sign up')

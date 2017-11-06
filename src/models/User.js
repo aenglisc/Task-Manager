@@ -54,6 +54,11 @@ export default connect => connect.define('User', {
         msg: 'Your password should be at least 3 symbols long',
       },
     },
-    freezeTableName: true,
+  },
+}, {
+  getterMethods: {
+    fullName() {
+      return `${this.firstName} ${this.lastName}`;
+    },
   },
 });

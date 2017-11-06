@@ -4,3 +4,12 @@ block content
   .jumbotron
     h1.text-center.display-1
       | New Task
+
+    .row.mt-3.align-center
+      .col-sm-6.mx-auto
+        +formFor(f, { url: urlFor('tasks#create'), method: 'post' })
+          +input(f, 'name', 'Name your task')
+          +selectUser(f, 'assignedToId', users)
+          +textarea(f, 'description', 'Describe the task')
+          +input(f, 'tags', 'Input a comma separated list of tags')
+          +button(f, 'Create task')

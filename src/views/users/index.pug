@@ -7,16 +7,14 @@ block content
     table.table.table-striped.text-center 
       thead
         tr
-          th First Name
-          th Last Name
+          th Full Name
           th E-mail
           th
           th
       tbody
         each user in users
           tr
-            td.align-middle= user.firstName
-            td.align-middle= user.lastName
+            td.align-middle= user.fullName
             td.align-middle= user.email
             td
               +formFor(user, { url: urlFor('users#show', user.id) })

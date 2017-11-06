@@ -3,5 +3,17 @@ extends /layouts/application.pug
 
 block content
   .jumbotron
-    h1.text-center.display-1
-      | Editing some task
+    h1.text-center.display-1= `Editing task: ${f.object.name}`
+
+    .row.mt-2
+      .col-sm-6.mx-auto
+        +formFor(f, { url: urlFor('tasks#update', f.object.id), method: 'patch'})
+          +input(f, 'name', 'Input a name for your task')
+          +selectStatus(f, 'statusId', statuses, f.object.status.id)
+          +selectUser(f, 'assignedToId', users, f.object.assignedTo.id)
+          +textarea(f, 'description', 'Describe the task', f.object.description)
+          +input(f, 'tags', 'Input a comma separated list of tags', `${f.object.Tags.map(item => item.name).join(', ')}`)
+          button.btn.btn-outline-primary.btn-block.mt-2(type='submit')= 'Update'
+        
+        +formFor(f, { url: urlFor('tasks#show', f.object.id) })
+          button.btn.btn-outline-success.btn-block.mt-2(type='submit')= 'Go back'

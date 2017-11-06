@@ -31,6 +31,7 @@ export default connect => connect.define('Task', {
   },
   assignedToId: {
     type: Sequelize.INTEGER,
+    allowNull: false,
     validate: {
       notEmpty: {
         args: true,

@@ -2,5 +2,42 @@ extends /layouts/application.pug
 
 block content
   .jumbotron
-    h1.text-center.display-1
-      | Some task
+    h1.text-center.display-1= `Task: ${task.name}`
+    h3.text-center= `Status: ${task.status.name}`
+    h5.text-center= task.description
+
+    .row.mt-2.text-center
+      .col-sm-6.mx-auto
+        row
+          each tag in task.Tags
+            .d-inline
+              span
+                kbd.py-0.my-1= tag.name
+        table.table.col-md-3
+          tbody
+            tr
+              th.text-right= 'Created by'
+              if task.creator.id === id
+                th.text-left= `${task.creator.fullName} (You)`
+              else
+                th.text-left= `${task.creator.fullName}`
+            tr
+              th.text-right= 'Assigned to'
+              if task.assignedTo.id === id
+                th.text-left= `${task.assignedTo.fullName} (You)`
+              else
+                th.text-left= `${task.assignedTo.fullName}`
+            tr
+              th.text-right= 'Created'
+              th.text-left= `${task.createdAt}`
+            tr
+              th.text-right= 'Updated'
+              th.text-left= `${task.updatedAt}`
+            
+        +formFor(user, { url: urlFor('tasks#index'), method: 'get' })
+          button.btn.btn-outline-success.btn-block.mt-2(type='submit')= 'To list'
+        if task.creator.id === id
+          +formFor(user, { url: urlFor('tasks#edit', task.id), method: 'get' })
+            button.btn.btn-outline-primary.btn-block.mt-2(type='submit')= 'Edit'
+          +formFor(user, { url: urlFor('tasks#destroy', task.id), method: 'delete', confirm: `You are about to delete ${task.name}, are you sure?`})
+            button.btn.btn-outline-danger.btn-block.mt-2(type='submit')= 'Delete'
