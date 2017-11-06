@@ -42,11 +42,6 @@ export default (connect) => {
     },
   }, {
     freezeTableName: true,
-    getterMethods: {
-      fullName() {
-        return `${this.firstName} ${this.lastName}`;
-      },
-    },
   });
   Task.associate = (models) => {
     Task.belongsTo(models.TaskStatus, { as: 'status' });
