@@ -124,7 +124,12 @@ export default (router, {
       task.tags = task.Tags.map(item => item.name).join(', ');
       logger(task.tags);
       if (ctx.state.id && Number(ctx.state.id) === Number(task.creator.id)) {
-        ctx.render('tasks/edit', { users, statuses, f: buildFormObj(task) });
+        ctx.render('tasks/edit', {
+          name: task.name,
+          users,
+          statuses,
+          f: buildFormObj(task),
+        });
       } else {
         ctx.flash.set({
           type: 'danger',
@@ -146,10 +151,9 @@ export default (router, {
           { model: Tag },
         ],
       });
+      const { name } = task;
       const tags = await getTags(form.tags);
-
       await task.setTags([]);
-
       try {
         if (tags.length > 0) {
           Promise.all(tags.map(async (tagName) => {
@@ -162,17 +166,27 @@ export default (router, {
             }
           }));
         }
-
         await task.update(form, { where: { id: ctx.params.id } });
-        logger('tasks PATCH done');
-        ctx.flash.set({ type: 'success', text: 'Task has been updated' });
+        ctx.flash.set({ type: 'success', text: 'The task has been updated' });
         ctx.redirect(router.url('tasks#edit', ctx.params.id));
       } catch (e) {
+        const users = await User.findAll();
+        const statuses = await TaskStatus.findAll();
         form.id = ctx.params.id;
-        form.status.id = form.statusId;
-        form.assignedTo.id = form.assignedToId;
-        logger('tasks PATCH error', e);
-        ctx.render('tasks/edit', { f: buildFormObj(form, e) });
+        form.status = { id: form.statusId };
+        form.assignedTo = { id: form.assignedToId };
+        ctx.state.flash = {
+          get: () => ({
+            type: 'danger',
+            text: 'Unable to edit the task',
+          }),
+        };
+        ctx.render('tasks/edit', {
+          name,
+          users,
+          statuses,
+          f: buildFormObj(form, e),
+        });
         ctx.response.status = 422;
       }
     })
