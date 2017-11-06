@@ -56,6 +56,7 @@ export default connect => connect.define('User', {
     },
   },
 }, {
+  freezeTableName: true,
   getterMethods: {
     fullName() {
       return `${this.firstName} ${this.lastName}`;
