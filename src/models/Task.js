@@ -47,14 +47,12 @@ export default (connect) => {
         return `${this.firstName} ${this.lastName}`;
       },
     },
-    classMethods: {
-      associate: (models) => {
-        Task.belongsTo(models.TaskStatus, { foreignKey: 'status' });
-        Task.belongsTo(models.User, { as: 'Assignee', foreignKey: 'assignedTo' });
-        Task.belongsTo(models.User, { as: 'Creator', foreignKey: 'creator' });
-        Task.belongsToMany(models.Tag, { through: 'TaskTag' });
-      },
-    },
   });
+  Task.associate = (models) => {
+    Task.belongsTo(models.TaskStatus, { foreignKey: 'status' });
+    Task.belongsTo(models.User, { as: 'assignedTo' });
+    Task.belongsTo(models.User, { as: 'creator' });
+    Task.belongsToMany(models.Tag, { through: 'TaskTag' });
+  };
   return Task;
 };

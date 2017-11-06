@@ -13,14 +13,11 @@ export default (connect) => {
       },
     },
   }, {
-    classMethods: {
-      associate: (models) => {
-        TaskStatus.hasMany(models.Task, { foreignKey: 'statusId', as: 'status' });
-      },
-    },
     freezeTableName: true,
     timestamps: false,
   });
-
+  TaskStatus.associate = (models) => {
+    TaskStatus.hasMany(models.Task, { foreignKey: 'statusId', as: 'status' });
+  };
   return TaskStatus;
 };

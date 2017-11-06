@@ -63,12 +63,10 @@ export default (connect) => {
         return `${this.firstName} ${this.lastName}`;
       },
     },
-    classMethods: {
-      associate: (models) => {
-        User.hasMany(models.Task, { foreignKey: 'creatorId', as: 'creator' });
-        User.hasMany(models.Task, { foreignKey: 'assignedToId', as: 'assignedTo' });
-      },
-    },
   });
+  User.associate = (models) => {
+    User.hasMany(models.Task, { foreignKey: 'creatorId', as: 'creator' });
+    User.hasMany(models.Task, { foreignKey: 'assignedToId', as: 'assignedTo' });
+  };
   return User;
 };
