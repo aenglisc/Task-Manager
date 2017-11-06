@@ -35,10 +35,11 @@ export default () => {
       }
     } catch (err) {
       log(err);
-      rollbar.error(err, ctx.request);
       ctx.status = err.status || 500;
       if (ctx.status === 404) {
         ctx.render('errors/404');
+      } else {
+        rollbar.error(err, ctx.request);
       }
     }
   });
