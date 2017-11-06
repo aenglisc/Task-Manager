@@ -6,6 +6,7 @@ export default async () => {
 
   await models.User.sync({ force: true });
   await models.TaskStatus.sync({ force: true });
+  await models.Task.sync({ force: true });
   await models.Tag.sync({ force: true });
   await models.TaskTag.sync({ force: true });
   await models.TaskStatus.bulkCreate([
@@ -14,5 +15,4 @@ export default async () => {
     { name: 'Testing' },
     { name: 'Completed' },
   ]);
-  await models.Task.sync({ force: true });
 };
