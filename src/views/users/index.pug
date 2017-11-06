@@ -9,20 +9,16 @@ block content
         tr
           th Full Name
           th E-mail
-          th
+          th Joined
           th
       tbody
         each user in users
           tr
             td.align-middle= user.fullName
             td.align-middle= user.email
+            td.align-middle= user.createdAt.toLocaleString()
             td
               +formFor(user, { url: urlFor('users#show', user.id) })
                 button.btn.btn-outline-info.btn-block(type='submit')= 'View'
-            td
-              if id == user.id
-                +formFor(user, { url: urlFor('users#destroy', user.id), method: 'delete', confirm: `You are about to delete ${user.firstName} ${user.lastName}'s profile, are you sure?`})
-                  button.btn.btn-outline-danger.btn-block(type='submit')= 'Delete'
-              else
-                button.btn.btn-outline-secondary.btn-block(type='button', disabled='') Delete
+
                 

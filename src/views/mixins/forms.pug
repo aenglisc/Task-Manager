@@ -42,6 +42,21 @@ mixin selectUser(f, property, users, selected)
           else
             option(value= user.id)= `Assign to: ${user.fullName}`
 
+mixin searchSelect(title, queryName, options, selector)
+  .form-group
+    select.custom-select.text-truncate(name=queryName class='form-control mb-2 mr-sm-2 mb-sm-0')
+      if options
+        if selector == ''
+          option(selected='selected' value='')= `${title}: any`
+        else
+          option(value='')= `${title}: any`
+        for option in options 
+          if selector == option.id
+            option(selected='selected' value= option.id)= `${title}: ${option.fullName || option.name}`
+          else
+            option(value= option.id)= `${title}: ${option.fullName || option.name}`
+
+
 mixin textarea(f, property, placeholder, content)
   .form-group
     textarea(name=getInputName(f, property) class='form-control' class=(f.errors[property] && 'border-danger') rows='3' placeholder=`${placeholder}`)= content

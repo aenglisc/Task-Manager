@@ -43,6 +43,7 @@ export default (router, { logger, User }) => {
     .delete('sessions#destroy', '/sessions', (ctx) => {
       logger('Logging out...');
       ctx.session = {};
+      logger('Success!');
       ctx.flash.set({
         type: 'success',
         text: 'You have successfully signed out',

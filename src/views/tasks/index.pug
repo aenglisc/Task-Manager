@@ -5,11 +5,25 @@ block content
     h1.text-center.display-1
       | Tasks
 
-    if id
-      .row.mt-2
-        .col-sm-6.mx-auto
-          +formFor(user, { url: urlFor('tasks#new'), method: 'get' })
-            button.btn.btn-outline-primary.btn-block.mt-2.mb-2(type='submit')= 'Create a new task'
+    
+    .row
+      .col-sm-6.mx-auto.justify-content-center
+        if id
+        form(action=urlFor('tasks#index')).justify-content-center
+          table.table-sm.text-center 
+            tbody
+              tr
+                td
+                  +searchSelect('Created by', 'creatorId', users, query.creatorId || '')
+                td
+                  +searchSelect('Assigned to', 'assignedToId', users, query.assignedToId || '')
+                td
+                  +searchSelect('Status', 'statusId', statuses, query.statusId || '')
+                td
+                  +searchSelect('Tag', 'tag', tags, query.tag || '')
+          button.btn.btn-outline-success.btn-block.mb-2(type='submit')= 'Filter tasks'
+        +formFor(user, { url: urlFor('tasks#new'), method: 'get' })
+          button.btn.btn-outline-primary.btn-block.mt-2.mb-2(type='submit')= 'Create a new task'
 
     table.table.table-striped.text-center 
       thead

@@ -16,22 +16,44 @@ export default (router, {
     .get('tasks#index', '/tasks', async (ctx) => {
       logger('Loading tasks index page...');
 
-      // const { query } = ctx.request;
+      logger('Request', ctx.request.query);
+      const { query } = ctx.request;
+      const users = await User.findAll();
+      const tags = await Tag.findAll();
+      const statuses = await TaskStatus.findAll();
+
+      const predicate = Object.keys(query).length === 0;
+
       const tasks = await Task.findAll({
         include: [
-          { model: User, as: 'assignedTo' },
-          { model: User, as: 'creator' },
-          { model: TaskStatus, as: 'status' },
-          { model: Tag },
+          predicate || query.assignedToId === '' ?
+            { model: User, as: 'assignedTo' } :
+            { model: User, as: 'assignedTo', where: { id: query.assignedToId } },
+          predicate || query.creatorId === '' ?
+            { model: User, as: 'creator' } :
+            { model: User, as: 'creator', where: { id: query.creatorId } },
+          predicate || query.statusId === '' ?
+            { model: TaskStatus, as: 'status' } :
+            { model: TaskStatus, as: 'status', where: { id: query.statusId } },
+          predicate || query.tag === '' ?
+            { model: Tag } :
+            { model: Tag, where: { id: query.tag } },
         ],
       });
-      await ctx.render('tasks/index', { tasks });
+      await ctx.render('tasks/index', {
+        statuses,
+        tags,
+        users,
+        tasks,
+        query,
+      });
       logger('Tasks page index rendered!');
     })
 
     .get('tasks#new', '/tasks/new', async (ctx) => {
       logger('Loading task creation page...');
       if (ctx.state.id) {
+        logger('User is authorised, moving on');
         const task = Task.build();
         const users = await User.findAll();
         ctx.render('tasks/new', { users, f: buildFormObj(task) });
