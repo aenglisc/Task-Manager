@@ -4,12 +4,13 @@ import encrypt from '../lib/encrypt';
 export default (router, { logger, User }) => {
   router
     .get('sessions#new', '/sessions/new', async (ctx) => {
-      logger('GET /sessions/new || Sign in page');
+      logger('Rendering the sign in page...');
       await ctx.render('sessions/new', { f: buildFormObj({}) });
+      logger('Rendered!');
     })
 
     .post('sessions#create', '/sessions', async (ctx) => {
-      logger('POST /sessions || Signing in...');
+      logger('Signing in...');
       const { email, password } = ctx.request.body.form;
       const user = await User.findOne({
         where: {
@@ -17,16 +18,17 @@ export default (router, { logger, User }) => {
         },
       });
       if (user && user.passwordDigest === encrypt(password)) {
-        logger('POST /sessions || Signed in');
+        logger('Success!');
         ctx.flash.set({
           type: 'success',
           text: 'You have successfully signed in',
         });
         ctx.session.id = user.id;
         ctx.session.email = user.email;
+        logger('Redirecting to the homepage...');
         ctx.redirect(router.url('home'));
       } else {
-        logger('POST /sessions || Unable to sign in');
+        logger('Unable to sign in');
         ctx.state.flash = {
           get: () => ({
             type: 'danger',
@@ -39,12 +41,13 @@ export default (router, { logger, User }) => {
     })
 
     .delete('sessions#destroy', '/sessions', (ctx) => {
-      logger('DELETE /sessions || Signing out');
+      logger('Logging out...');
       ctx.session = {};
       ctx.flash.set({
         type: 'success',
         text: 'You have successfully signed out',
       });
+      logger('Redirecting to the homepage...');
       ctx.redirect(router.url('home'));
     });
 };

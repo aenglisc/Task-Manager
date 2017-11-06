@@ -1,6 +1,6 @@
 export default (router, { logger, User }) => {
   router.get('home', '/', async (ctx) => {
-    logger('GET / || Rendering the home page');
+    logger('Rendering the home page...');
     const user = await User.findById(ctx.state.id);
     ctx.render('home/index', { user });
   });

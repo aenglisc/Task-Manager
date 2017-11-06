@@ -3,56 +3,61 @@ import buildFormObj from '../lib/formObjectBuilder';
 export default (router, { logger, User }) => {
   router
     .get('users#index', '/users', async (ctx) => {
-      logger('GET /users || All users page');
+      logger('Loading the users index page...');
       const users = await User.findAll();
       ctx.render('users/index', { users });
     })
 
     .get('users#new', '/users/new', (ctx) => {
-      logger('GET /users/new || Sign up page');
+      logger('Loading the sign up page...');
       const user = User.build();
       ctx.render('users/new', { f: buildFormObj(user) });
     })
 
     .get('users#show', '/users/:id', async (ctx) => {
-      logger(`GET /users/${ctx.params.id} || Show user page`);
+      logger(`Loading user ${ctx.params.id} profile...`);
       const user = await User.findById(ctx.params.id);
       if (user) {
         ctx.render('users/show', { user });
       } else {
-        logger(`GET /users/${ctx.params.id} || Unable to find user`);
+        logger(`Unable to find user ${ctx.params.id}`);
         ctx.throw(404);
       }
     })
 
     .get('users#edit', '/users/:id/edit', async (ctx) => {
-      logger(`GET /users/${ctx.params.id}/edit || Edit user page`);
+      logger('Loading the profile editor...');
       if (ctx.state.id && Number(ctx.state.id) === Number(ctx.params.id)) {
+        logger('User is authorised, moving on');
         const user = await User.findById(ctx.params.id);
         ctx.render('users/edit', { user, f: buildFormObj(user) });
       } else {
+        logger('User is not authorised');
         ctx.flash.set({
           type: 'danger',
           text: 'A profile can only be edited by its owner',
         });
+        logger('Redirecting to user profile...');
         ctx.redirect(router.url('users#show', ctx.params.id));
       }
     })
 
     .post('users#create', '/users', async (ctx) => {
-      logger('POST /users || User creation');
+      logger('Signing up...');
       const { form } = ctx.request.body;
+      logger('Form data:', form);
       const user = await User.build(form);
       try {
         await user.save();
-        logger('POST /users || A user has been created');
+        logger('Success!');
         ctx.flash.set({
           type: 'success',
           text: `${form.firstName} ${form.lastName} has been created`,
         });
+        logger('Redirecting to user profile');
         ctx.redirect(router.url('users#show', user.dataValues.id));
       } catch (err) {
-        logger('POST /users || Error encountered', err);
+        logger('Error encountered', err);
         ctx.state.flash = {
           get: () => ({
             type: 'danger',
@@ -65,14 +70,16 @@ export default (router, { logger, User }) => {
     })
 
     .patch('users#update', '/users/:id', async (ctx) => {
-      logger('PATCH /users || Editing user info');
+      logger('Editing user info...');
       if (ctx.state.id === ctx.params.id) {
+        logger('User is authorised, moving on');
         const { form } = ctx.request.body;
+        logger('Form data:', form);
         const user = await User.findById(ctx.params.id);
         const { firstName, lastName } = user;
         try {
           await user.update(form, { where: { id: ctx.params.id } });
-          logger('PATCH /users || User info has been successfully edited');
+          logger('Success');
           ctx.state.flash = {
             get: () => ({
               type: 'success',
@@ -81,7 +88,7 @@ export default (router, { logger, User }) => {
           };
           ctx.render('users/edit', { user, f: buildFormObj(user) });
         } catch (err) {
-          logger('PATCH /users || Error encountered', err);
+          logger('Error encountered', err);
           ctx.state.flash = {
             get: () => ({
               type: 'danger',
@@ -92,36 +99,42 @@ export default (router, { logger, User }) => {
           ctx.response.status = 422;
         }
       } else {
+        logger('User is not authorised');
         ctx.flash.set({
           type: 'danger',
           text: 'A profile can only be edited by its owner',
         });
+        logger('Redirecting to user profile...');
         ctx.redirect(router.url('users#show', ctx.params.id));
       }
     })
 
     .delete('users#destroy', '/users/:id', async (ctx) => {
-      logger('DELETE /users || Delete user');
+      logger(`Deleting user ${ctx.params.id}...`);
 
       if (ctx.state.id && Number(ctx.state.id) === Number(ctx.params.id)) {
+        logger('User is authorised, moving on');
         const { firstName, lastName } = await User.findById(ctx.params.id);
         await User.destroy({
           where: {
             id: ctx.params.id,
           },
         });
-        logger('DELETE /users || User has been deleted');
+        logger('Success!');
         ctx.session = {};
         ctx.flash.set({
           type: 'success',
           text: `${firstName} ${lastName}'s profile has been deleted`,
         });
+        logger('Redirecting to the homepage...');
         ctx.redirect(router.url('home'));
       } else {
+        logger('User is not authorised');
         ctx.flash.set({
           type: 'danger',
           text: 'A profile can only be deleted by its owner',
         });
+        logger('Redirecting to user profile');
         ctx.redirect(router.url('users#show', ctx.params.id));
       }
     });

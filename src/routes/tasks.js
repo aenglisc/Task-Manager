@@ -14,7 +14,7 @@ export default (router, {
 }) => {
   router
     .get('tasks#index', '/tasks', async (ctx) => {
-      logger('GET /tasks || All tasks page');
+      logger('Loading tasks index page...');
 
       // const { query } = ctx.request;
       const tasks = await Task.findAll({
@@ -25,30 +25,34 @@ export default (router, {
           { model: Tag },
         ],
       });
-
-      logger(tasks);
-      ctx.render('tasks/index', { tasks });
+      await ctx.render('tasks/index', { tasks });
+      logger('Tasks page index rendered!');
     })
 
     .get('tasks#new', '/tasks/new', async (ctx) => {
-      logger('GET /tasks/new || New task page');
+      logger('Loading task creation page...');
       if (ctx.state.id) {
         const task = Task.build();
         const users = await User.findAll();
         ctx.render('tasks/new', { users, f: buildFormObj(task) });
+        logger('Task creation page rendered!');
       } else {
+        logger('Unable to load the task creation page');
         ctx.flash.set({
           type: 'danger',
           text: 'Only authorised users can create tasks',
         });
-        ctx.redirect(router.url('tasks#show'));
+        logger('Redirecting to task page index...');
+        ctx.redirect(router.url('tasks#index'));
       }
     })
 
     .post('tasks#create', '/tasks', async (ctx) => {
-      logger('POST /tasks || Create new task');
+      logger('Creating new task...');
       if (ctx.state.id) {
+        logger('User is authorised, moving on');
         const { form } = ctx.request.body;
+        logger('Form data:', form);
         form.creatorId = ctx.state.id;
 
         const tags = await getTags(form.tags);
@@ -56,6 +60,7 @@ export default (router, {
         const users = await User.findAll();
 
         try {
+          logger('Processing tags...');
           if (tags.length > 0) {
             Promise.all(tags.map(async (tagName) => {
               const tag = await Tag.findOne({ where: { name: tagName } });
@@ -67,19 +72,21 @@ export default (router, {
               }
             }));
           }
+          logger('Tags processed');
           await task.save();
+          logger('Task saved');
           ctx.flash.set({
             type: 'success',
             text: `${form.name} has been created`,
           });
-          logger('POST /tasks || A task has been created');
+          logger('Redirecting to task viewer...');
           ctx.redirect(router.url('tasks#show', task.dataValues.id));
         } catch (err) {
-          logger('POST /tasks || Error encountered', err);
+          logger('Unable to create the task:', err);
           ctx.state.flash = {
             get: () => ({
               type: 'danger',
-              text: 'Unable to create task',
+              text: 'Unable to create the task',
             }),
           };
           form.id = ctx.params.id;
@@ -88,16 +95,18 @@ export default (router, {
           ctx.response.status = 422;
         }
       } else {
+        logger('User is not authorised');
         ctx.flash.set({
           type: 'danger',
           text: 'Only authorised users can create tasks',
         });
+        logger('Redirecting to task viewer...');
         ctx.redirect(router.url('tasks#show', ctx.params.id));
       }
     })
 
     .get('tasks#show', '/tasks/:id', async (ctx) => {
-      logger(`GET /tasks/${ctx.params.id} || Show task page`);
+      logger('Loading the task viewer page...');
       const task = await Task.findById(ctx.params.id, {
         include: [
           { model: User, as: 'assignedTo' },
@@ -107,12 +116,11 @@ export default (router, {
         ],
       });
       ctx.render('tasks/show', { task });
+      logger('Task viewer page rendered!');
     })
 
     .get('tasks#edit', '/tasks/:id/edit', async (ctx) => {
-      logger(`GET /tasks/${ctx.params.id}/edit || Edit task page`);
-      const users = await User.findAll();
-      const statuses = await TaskStatus.findAll();
+      logger('Loading the task editor page...');
       const task = await Task.findById(ctx.params.id, {
         include: [
           { model: User, as: 'assignedTo' },
@@ -121,28 +129,33 @@ export default (router, {
           { model: Tag },
         ],
       });
-      task.tags = task.Tags.map(item => item.name).join(', ');
-      logger(task.tags);
       if (ctx.state.id && Number(ctx.state.id) === Number(task.creator.id)) {
+        logger('User is authorised, moving on');
+        const users = await User.findAll();
+        const statuses = await TaskStatus.findAll();
+        task.tags = task.Tags.map(item => item.name).join(', ');
         ctx.render('tasks/edit', {
           name: task.name,
           users,
           statuses,
           f: buildFormObj(task),
         });
+        logger('Success!');
       } else {
+        logger('User is not authorised');
         ctx.flash.set({
           type: 'danger',
           text: 'Tasks can only be edited by their creators',
         });
+        logger('Redirecting to task viewer...');
         ctx.redirect(router.url('tasks#show', ctx.params.id));
       }
     })
 
     .patch('tasks#update', '/tasks/:id', async (ctx) => {
-      logger('tasks PATCH');
+      logger(`Updating task ${ctx.params.id}`);
       const { form } = ctx.request.body;
-      logger('tasks PATCH form:', form);
+      logger('Form data:', form);
       const task = await Task.findById(ctx.params.id, {
         include: [
           { model: User, as: 'assignedTo' },
@@ -155,6 +168,7 @@ export default (router, {
       const tags = await getTags(form.tags);
       await task.setTags([]);
       try {
+        logger('Processing tags...');
         if (tags.length > 0) {
           Promise.all(tags.map(async (tagName) => {
             const tag = await Tag.findOne({ where: { name: tagName } });
@@ -166,10 +180,13 @@ export default (router, {
             }
           }));
         }
+        logger('Tags proccessed');
         await task.update(form, { where: { id: ctx.params.id } });
+        logger('Success!');
         ctx.flash.set({ type: 'success', text: 'The task has been updated' });
         ctx.redirect(router.url('tasks#edit', ctx.params.id));
-      } catch (e) {
+      } catch (err) {
+        logger('Unable to edit the task:', err);
         const users = await User.findAll();
         const statuses = await TaskStatus.findAll();
         form.id = ctx.params.id;
@@ -185,34 +202,38 @@ export default (router, {
           name,
           users,
           statuses,
-          f: buildFormObj(form, e),
+          f: buildFormObj(form, err),
         });
         ctx.response.status = 422;
       }
     })
 
     .delete('tasks#destroy', '/tasks/:id', async (ctx) => {
-      logger('DELETE /tasks || Delete task');
+      logger(`Deleting task ${ctx.params.id}`);
       const { name, creator } = await Task.findById(ctx.params.id, {
         include: [{ model: User, as: 'creator' }],
       });
       if (ctx.state.id && Number(ctx.state.id) === Number(creator.id)) {
+        logger('User is authorised, moving on');
         await Task.destroy({
           where: {
             id: ctx.params.id,
           },
         });
-        logger('DELETE /users || User has been deleted');
+        logger('The task has been deleted');
         ctx.flash.set({
           type: 'success',
           text: `${name} has been deleted`,
         });
+        logger('Redirecting to task page index...');
         ctx.redirect(router.url('tasks#index'));
       } else {
+        logger('User is not authorised');
         ctx.flash.set({
           type: 'danger',
           text: 'A task can only be deleted by its creator',
         });
+        logger('Redirecting to task viewer...');
         ctx.redirect(router.url('tasks#show', ctx.params.id));
       }
     });
