@@ -16,11 +16,12 @@ export default (router, {
     .get('tasks#index', '/tasks', async (ctx) => {
       logger('GET /tasks || All tasks page');
 
+      // const { query } = ctx.request;
       const tasks = await Task.findAll({
         include: [
           { model: User, as: 'assignedTo' },
           { model: User, as: 'creator' },
-          { model: TaskStatus },
+          { model: TaskStatus, as: 'status' },
           { model: Tag },
         ],
       });

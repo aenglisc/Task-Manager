@@ -49,7 +49,7 @@ export default (connect) => {
     },
   });
   Task.associate = (models) => {
-    Task.belongsTo(models.TaskStatus, { foreignKey: 'status' });
+    Task.belongsTo(models.TaskStatus, { as: 'status' });
     Task.belongsTo(models.User, { as: 'assignedTo' });
     Task.belongsTo(models.User, { as: 'creator' });
     Task.belongsToMany(models.Tag, { through: 'TaskTag' });
