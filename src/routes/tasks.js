@@ -12,6 +12,15 @@ export default (router, {
   Task,
   User,
 }) => {
+  const getTasks = id => Task.findById(id, {
+    include: [
+      { model: User, as: 'assignedTo' },
+      { model: User, as: 'creator' },
+      { model: TaskStatus, as: 'status' },
+      { model: Tag },
+    ],
+  });
+
   router
     .get('tasks#index', '/tasks', async (ctx) => {
       const { query } = ctx.request;
@@ -34,14 +43,14 @@ export default (router, {
             { model: TaskStatus, as: 'status', where: { id: query.statusId } },
           noQuery || query.tag === '' ?
             { model: Tag } :
-            { model: Tag, where: { id: query.tag } },
+            { model: Tag, where: { id: { $contains: query.tag } } },
         ],
       });
       ctx.render('tasks/index', {
         statuses,
         tags,
-        users,
         tasks,
+        users,
         query,
       });
     })
@@ -95,26 +104,12 @@ export default (router, {
     })
 
     .get('tasks#show', '/tasks/:id', async (ctx) => {
-      const task = await Task.findById(ctx.params.id, {
-        include: [
-          { model: User, as: 'assignedTo' },
-          { model: User, as: 'creator' },
-          { model: TaskStatus, as: 'status' },
-          { model: Tag },
-        ],
-      });
+      const task = await getTasks(ctx.params.id);
       ctx.render('tasks/show', { task });
     })
 
     .get('tasks#edit', '/tasks/:id/edit', async (ctx) => {
-      const task = await Task.findById(ctx.params.id, {
-        include: [
-          { model: User, as: 'assignedTo' },
-          { model: User, as: 'creator' },
-          { model: TaskStatus, as: 'status' },
-          { model: Tag },
-        ],
-      });
+      const task = await getTasks(ctx.params.id);
       if (ctx.state.id && Number(ctx.state.id) === Number(task.creator.id)) {
         const users = await User.findAll();
         const statuses = await TaskStatus.findAll();
@@ -133,14 +128,7 @@ export default (router, {
 
     .patch('tasks#update', '/tasks/:id', async (ctx) => {
       const { form } = ctx.request.body;
-      const task = await Task.findById(ctx.params.id, {
-        include: [
-          { model: User, as: 'assignedTo' },
-          { model: User, as: 'creator' },
-          { model: TaskStatus, as: 'status' },
-          { model: Tag },
-        ],
-      });
+      const task = await getTasks(ctx.params.id);
       const { name } = task;
       const tags = await getTags(form.tags);
       await task.setTags([]);
@@ -166,7 +154,7 @@ export default (router, {
         form.id = ctx.params.id;
         form.status = { id: form.statusId };
         form.assignedTo = { id: form.assignedToId };
-        ctx.flash.set({ type: 'danger', text: 'Unable to edit the task', now: true });
+        ctx.flash.set({ type: 'danger', text: 'Unable to update the task', now: true });
         ctx.render('tasks/edit', {
           name,
           users,

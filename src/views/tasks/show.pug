@@ -18,13 +18,13 @@ block content
             tr
               th.text-right= 'By'
               if task.creator.id === id
-                th.text-left= `${task.creator.fullName} (You)`
+                th.text-left= 'You'
               else
                 th.text-left= `${task.creator.fullName}`
             tr
               th.text-right= 'For'
               if task.assignedTo.id === id
-                th.text-left= `${task.assignedTo.fullName} (You)`
+                th.text-left= 'You'
               else
                 th.text-left= `${task.assignedTo.fullName}`
             tr
