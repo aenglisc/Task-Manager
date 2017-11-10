@@ -43,7 +43,7 @@ export default (router, {
             { model: TaskStatus, as: 'status', where: { id: query.statusId } },
           noQuery || query.tag === '' ?
             { model: Tag } :
-            { model: Tag, where: { id: { $contains: query.tag } } },
+            { model: Tag, where: { id: { $contains: [query.tag] } } },
         ],
       });
       ctx.render('tasks/index', {
