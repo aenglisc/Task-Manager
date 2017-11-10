@@ -10,6 +10,7 @@ export default (router, {
   Tag,
   TaskStatus,
   Task,
+  TaskTag,
   User,
 }) => {
   const getTasks = id => Task.findById(id, {
@@ -43,15 +44,15 @@ export default (router, {
             { model: TaskStatus, as: 'status', where: { id: query.statusId } },
           noQuery || query.tag === '' ?
             { model: Tag } :
-            { model: Tag, where: { id: { $contains: [query.tag] } } },
+            { model: Tag, where: { id: query.tag } },
         ],
       });
       ctx.render('tasks/index', {
+        query,
         statuses,
         tags,
         tasks,
         users,
-        query,
       });
     })
 
