@@ -10,7 +10,6 @@ export default (router, {
   Tag,
   TaskStatus,
   Task,
-  TaskTag,
   User,
 }) => {
   const getTasks = id => Task.findById(id, {
