@@ -38,8 +38,7 @@ export default (router, { logger, User }) => {
       const user = await User.build(form);
       try {
         await user.save();
-        ctx.flash.set({ type: 'success', text: `${user.fullName()} has been created` });
-        logger('Redirecting to user profile');
+        ctx.flash.set({ type: 'success', text: `${user.fullName} has been created` });
         ctx.redirect(router.url('users#show', user.dataValues.id));
       } catch (err) {
         logger('Error encountered', err);
