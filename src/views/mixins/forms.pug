@@ -44,17 +44,17 @@ mixin selectUser(f, property, users, selected)
 
 mixin searchSelect(title, queryName, options, selector)
   .form-group
-    select.custom-select.text-truncate(name=queryName class='form-control mb-2 mr-sm-2 mb-sm-0')
+    select.custom-select.text-truncate.border-success(name=queryName class='form-control mb-2 mr-sm-2 mb-sm-0')
       if options
         if selector == ''
-          option(selected='selected' value='')= `${title}: any`
+          option(selected='selected' value='')= `${title}: -`
         else
-          option(value='')= `${title}: any`
+          option(value='')= `${title}: -`
         for option in options 
           if selector == option.id
-            option(selected='selected' value= option.id)= `${title}: ${option.fullName || option.name}`
+            option(selected='selected' value= option.id)= `${title}: ${option.fullName && option.id == id ? 'me' : option.fullName || option.name}`
           else
-            option(value= option.id)= `${title}: ${option.fullName || option.name}`
+            option(value= option.id)= `${title}: ${option.fullName && option.id == id ? 'me' : option.fullName || option.name}`
 
 
 mixin textarea(f, property, placeholder, content)
