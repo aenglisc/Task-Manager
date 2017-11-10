@@ -5,7 +5,6 @@ import Router from 'koa-router';
 import Rollbar from 'rollbar';
 
 import bodyParser from 'koa-bodyparser';
-import flash from 'koa-flash-simple';
 import koaLogger from 'koa-logger';
 import methodOverride from 'koa-methodoverride';
 import middleware from 'koa-webpack';
@@ -15,6 +14,7 @@ import session from 'koa-generic-session';
 import _ from 'lodash';
 import path from 'path';
 
+import flash from './lib/flash';
 import log from './lib/logger';
 import addRoutes from './routes';
 import container from './container';
