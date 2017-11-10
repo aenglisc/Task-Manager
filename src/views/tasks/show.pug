@@ -16,13 +16,13 @@ block content
         table.table.col-md-3
           tbody
             tr
-              th.text-right= 'Created by'
+              th.text-right= 'By'
               if task.creator.id === id
                 th.text-left= `${task.creator.fullName} (You)`
               else
                 th.text-left= `${task.creator.fullName}`
             tr
-              th.text-right= 'Assigned to'
+              th.text-right= 'For'
               if task.assignedTo.id === id
                 th.text-left= `${task.assignedTo.fullName} (You)`
               else
