@@ -28,7 +28,6 @@ export default (router, {
 
     .post('users#create', '/users', async (ctx) => {
       const { form } = ctx.request.body;
-      logger('Form data:', form);
       const user = await User.build(form);
       try {
         await user.save();
