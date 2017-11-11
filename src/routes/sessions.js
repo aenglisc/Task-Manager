@@ -1,7 +1,6 @@
-import buildFormObj from '../lib/formObjectBuilder';
 import encrypt from '../lib/encrypt';
 
-export default (router, { logger, User }) => {
+export default (router, { buildFormObj, logger, User }) => {
   router
     .get('sessions#new', '/sessions/new', async (ctx) => {
       await ctx.render('sessions/new', { f: buildFormObj({}) });

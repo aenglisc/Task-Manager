@@ -7,21 +7,20 @@ import Rollbar from 'rollbar';
 import bodyParser from 'koa-bodyparser';
 import koaLogger from 'koa-logger';
 import methodOverride from 'koa-methodoverride';
-import middleware from 'koa-webpack';
 import serve from 'koa-static';
 import session from 'koa-generic-session';
+import webpack from 'koa-webpack';
 
 import _ from 'lodash';
 import path from 'path';
 
-import flash from './lib/flash';
-import log from './lib/logger';
+import flash from './middlewares/flash';
 import addRoutes from './routes';
 import container from './container';
 import getWebpackConfig from '../webpack.config.babel';
 
 export default () => {
-  log('Creating server');
+  container.logger('Creating server');
   const app = new Koa();
   const router = new Router();
   const rollbar = new Rollbar(process.env.ROLLBAR_ACCESS_TOKEN);
@@ -29,12 +28,13 @@ export default () => {
   app.use(async (ctx, next) => {
     try {
       await next();
+      container.logger(ctx);
       const status = ctx.status || 404;
       if (status === 404) {
         ctx.throw(404);
       }
     } catch (err) {
-      log(err);
+      container.logger(err);
       ctx.status = err.status || 500;
       if (ctx.status === 404) {
         ctx.render('errors/404');
@@ -70,7 +70,7 @@ export default () => {
   app.use(router.routes());
 
   if (process.env.NODE_ENV !== 'test') {
-    app.use(middleware({
+    app.use(webpack({
       config: getWebpackConfig(),
     }));
   }
@@ -89,6 +89,6 @@ export default () => {
   });
   pug.use(app);
 
-  log('The server has been created');
+  container.logger('The server has been created');
   return app;
 };

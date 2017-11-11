@@ -1,17 +1,32 @@
-import buildFormObj from '../lib/formObjectBuilder';
-
-const getTags = rawTagsData =>
-  rawTagsData.split(',')
-    .map(tagName => tagName.trim())
-    .filter(tagName => tagName.length > 0);
-
 export default (router, {
+  auth,
+  buildFormObj,
   logger,
   Tag,
   TaskStatus,
   Task,
   User,
 }) => {
+  const authoriseCreate = msg => auth(
+    router,
+    'tasks#index',
+    msg,
+  );
+
+  const authoriseEdit = msg => auth(
+    router,
+    'tasks#show',
+    msg,
+    () => Task.findAll({
+      include: [{ model: User, as: 'creator' }],
+    }),
+  );
+
+  const getTags = rawTagsData =>
+    rawTagsData.split(',')
+      .map(tagName => tagName.trim())
+      .filter(tagName => tagName.length > 0);
+
   const getTasks = id => Task.findById(id, {
     include: [
       { model: User, as: 'assignedTo' },
@@ -55,51 +70,41 @@ export default (router, {
       });
     })
 
-    .get('tasks#new', '/tasks/new', async (ctx) => {
-      if (ctx.state.id) {
-        const task = Task.build();
-        const users = await User.findAll();
-        ctx.render('tasks/new', { users, f: buildFormObj(task) });
-      } else {
-        ctx.flash.set({ type: 'danger', text: 'Only authorised users can create tasks' });
-        ctx.redirect(router.url('tasks#index'));
-      }
+    .get('tasks#new', '/tasks/new', authoriseCreate('A task can only be created by an authorised user'), async (ctx) => {
+      const task = Task.build();
+      const users = await User.findAll();
+      ctx.render('tasks/new', { users, f: buildFormObj(task) });
     })
 
-    .post('tasks#create', '/tasks', async (ctx) => {
-      if (ctx.state.id) {
-        const { form } = ctx.request.body;
-        form.creatorId = ctx.state.id;
+    .post('tasks#create', '/tasks', authoriseCreate('A task can only be created by an authorised user'), async (ctx) => {
+      const { form } = ctx.request.body;
+      form.creatorId = ctx.state.id;
 
-        const tags = await getTags(form.tags);
-        const task = await Task.build(form);
-        const users = await User.findAll();
+      const tags = await getTags(form.tags);
+      const task = await Task.build(form);
+      const users = await User.findAll();
 
-        try {
-          if (tags.length > 0) {
-            Promise.all(tags.map(async (tagName) => {
-              const tag = await Tag.findOne({ where: { name: tagName } });
-              if (tag) {
-                await task.addTags(tag);
-              } else {
-                const addTag = await Tag.create({ name: tagName });
-                await task.addTags(addTag);
-              }
-            }));
-          }
-          await task.save();
-          ctx.flash.set({ type: 'success', text: `${form.name} has been created` });
-          await ctx.redirect(router.url('tasks#show', task.dataValues.id));
-        } catch (err) {
-          logger('Unable to create the task:', err);
-          form.id = ctx.params.id;
-          ctx.flash.set({ type: 'danger', text: 'Unable to create the task', now: true });
-          ctx.render('tasks/new', { users, f: buildFormObj(form, err) });
-          ctx.response.status = 422;
+      try {
+        if (tags.length > 0) {
+          Promise.all(tags.map(async (tagName) => {
+            const tag = await Tag.findOne({ where: { name: tagName } });
+            if (tag) {
+              await task.addTags(tag);
+            } else {
+              const addTag = await Tag.create({ name: tagName });
+              await task.addTags(addTag);
+            }
+          }));
         }
-      } else {
-        ctx.flash.set({ type: 'danger', text: 'Only authorised users can create tasks' });
-        ctx.redirect(router.url('tasks#show', ctx.params.id));
+        await task.save();
+        ctx.flash.set({ type: 'success', text: `${form.name} has been created` });
+        await ctx.redirect(router.url('tasks#show', task.dataValues.id));
+      } catch (err) {
+        logger('Unable to create the task:', err);
+        form.id = ctx.params.id;
+        ctx.flash.set({ type: 'danger', text: 'Unable to create the task', now: true });
+        ctx.render('tasks/new', { users, f: buildFormObj(form, err) });
+        ctx.response.status = 422;
       }
     })
 
@@ -108,25 +113,20 @@ export default (router, {
       ctx.render('tasks/show', { task });
     })
 
-    .get('tasks#edit', '/tasks/:id/edit', async (ctx) => {
+    .get('tasks#edit', '/tasks/:id/edit', authoriseEdit('A task can only be edited by its creator'), async (ctx) => {
       const task = await getTasks(ctx.params.id);
-      if (ctx.state.id && Number(ctx.state.id) === Number(task.creator.id)) {
-        const users = await User.findAll();
-        const statuses = await TaskStatus.findAll();
-        task.tags = task.Tags.map(item => item.name).join(', ');
-        ctx.render('tasks/edit', {
-          name: task.name,
-          users,
-          statuses,
-          f: buildFormObj(task),
-        });
-      } else {
-        ctx.flash.set({ type: 'danger', text: 'A task can only be edited by its creator' });
-        ctx.redirect(router.url('tasks#show', ctx.params.id));
-      }
+      const users = await User.findAll();
+      const statuses = await TaskStatus.findAll();
+      task.tags = task.Tags.map(item => item.name).join(', ');
+      ctx.render('tasks/edit', {
+        name: task.name,
+        users,
+        statuses,
+        f: buildFormObj(task),
+      });
     })
 
-    .patch('tasks#update', '/tasks/:id', async (ctx) => {
+    .patch('tasks#update', '/tasks/:id', authoriseEdit('A task can only be edited by its creator'), async (ctx) => {
       const { form } = ctx.request.body;
       const task = await getTasks(ctx.params.id);
       const { name } = task;
@@ -165,17 +165,12 @@ export default (router, {
       }
     })
 
-    .delete('tasks#destroy', '/tasks/:id', async (ctx) => {
-      const { name, creator } = await Task.findById(ctx.params.id, {
+    .delete('tasks#destroy', '/tasks/:id', authoriseEdit('A task can only be deleted by its creator'), async (ctx) => {
+      const { name } = await Task.findById(ctx.params.id, {
         include: [{ model: User, as: 'creator' }],
       });
-      if (ctx.state.id && Number(ctx.state.id) === Number(creator.id)) {
-        await Task.destroy({ where: { id: ctx.params.id } });
-        ctx.flash.set({ type: 'success', text: `${name} has been deleted` });
-        ctx.redirect(router.url('tasks#index'));
-      } else {
-        ctx.flash.set({ type: 'danger', text: 'A task can only be deleted by its creator' });
-        ctx.redirect(router.url('tasks#show', ctx.params.id));
-      }
+      await Task.destroy({ where: { id: ctx.params.id } });
+      ctx.flash.set({ type: 'success', text: `${name} has been deleted` });
+      ctx.redirect(router.url('tasks#index'));
     });
 };

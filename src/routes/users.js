@@ -1,6 +1,10 @@
-import buildFormObj from '../lib/formObjectBuilder';
-
-export default (router, { logger, User }) => {
+export default (router, {
+  auth,
+  buildFormObj,
+  logger,
+  User,
+}) => {
+  const authorise = msg => auth(router, 'users#show', msg, () => User.findAll());
   router
     .get('users#index', '/users', async (ctx) => {
       const users = await User.findAll();
@@ -22,16 +26,6 @@ export default (router, { logger, User }) => {
       }
     })
 
-    .get('users#edit', '/users/:id/edit', async (ctx) => {
-      if (ctx.state.id && Number(ctx.state.id) === Number(ctx.params.id)) {
-        const user = await User.findById(ctx.params.id);
-        ctx.render('users/edit', { user, f: buildFormObj(user) });
-      } else {
-        ctx.flash.set({ type: 'danger', text: 'A profile can only be edited by its owner' });
-        ctx.redirect(router.url('users#show', ctx.params.id));
-      }
-    })
-
     .post('users#create', '/users', async (ctx) => {
       const { form } = ctx.request.body;
       logger('Form data:', form);
@@ -48,37 +42,32 @@ export default (router, { logger, User }) => {
       }
     })
 
-    .patch('users#update', '/users/:id', async (ctx) => {
-      if (ctx.state.id && Number(ctx.state.id) === Number(ctx.params.id)) {
-        const { form } = ctx.request.body;
-        const user = await User.findById(ctx.params.id);
-        const { firstName, lastName } = user;
-        try {
-          await user.update(form, { where: { id: ctx.params.id } });
-          ctx.flash.set({ type: 'success', text: 'User info has been updated', now: true });
-          ctx.render('users/edit', { user, f: buildFormObj(user) });
-        } catch (err) {
-          logger('Error encountered', err);
-          ctx.flash.set({ type: 'danger', text: 'Unable to edit user info', now: true });
-          ctx.render('users/edit', { firstName, lastName, f: buildFormObj(user, err) });
-          ctx.response.status = 422;
-        }
-      } else {
-        ctx.flash.set({ type: 'danger', text: 'A profile can only be edited by its owner' });
-        ctx.redirect(router.url('users#show', ctx.params.id));
+    .get('users#edit', '/users/:id/edit', authorise('A profile can only be edited by its owner'), async (ctx) => {
+      const user = await User.findById(ctx.params.id);
+      ctx.render('users/edit', { user, f: buildFormObj(user) });
+    })
+
+    .patch('users#update', '/users/:id', authorise('A profile can only be edited by its owner'), async (ctx) => {
+      const { form } = ctx.request.body;
+      const user = await User.findById(ctx.params.id);
+      const { firstName, lastName } = user;
+      try {
+        await user.update(form, { where: { id: ctx.params.id } });
+        ctx.flash.set({ type: 'success', text: 'User info has been updated', now: true });
+        ctx.render('users/edit', { user, f: buildFormObj(user) });
+      } catch (err) {
+        logger('Error encountered', err);
+        ctx.flash.set({ type: 'danger', text: 'Unable to edit user info', now: true });
+        ctx.render('users/edit', { firstName, lastName, f: buildFormObj(user, err) });
+        ctx.response.status = 422;
       }
     })
 
-    .delete('users#destroy', '/users/:id', async (ctx) => {
-      if (ctx.state.id && Number(ctx.state.id) === Number(ctx.params.id)) {
-        const user = await User.findById(ctx.params.id);
-        await User.destroy({ where: { id: ctx.params.id } });
-        ctx.session = {};
-        ctx.flash.set({ type: 'success', text: `${user.fullName()}'s profile has been deleted` });
-        ctx.redirect(router.url('home'));
-      } else {
-        ctx.flash.set({ type: 'danger', text: 'A profile can only be deleted by its owner' });
-        ctx.redirect(router.url('users#show', ctx.params.id));
-      }
+    .delete('users#destroy', '/users/:id', authorise('A profile can only be deleted by its owner'), async (ctx) => {
+      const user = await User.findById(ctx.params.id);
+      await User.destroy({ where: { id: ctx.params.id } });
+      ctx.session = {};
+      ctx.flash.set({ type: 'success', text: `${user.fullName}'s profile has been deleted` });
+      ctx.redirect(router.url('home'));
     });
 };
