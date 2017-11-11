@@ -21,5 +21,5 @@ block content
         if id === user.id
           +formFor(user, { url: urlFor('users#edit', user.id), method: 'get' })
             button.btn.btn-outline-primary.btn-block.mt-2(type='submit')= 'Edit'
-          +formFor(user, { url: urlFor('users#destroy', user.id), method: 'delete', confirm: `You are about to delete ${user.fullName}'s profile, are you sure?`})
+          +formFor(user, { url: urlFor('users#destroy', user.id), method: 'delete', confirm: user.fullName })
             button.btn.btn-outline-danger.btn-block.mt-2(type='submit')= 'Delete'
