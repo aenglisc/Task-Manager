@@ -52,9 +52,9 @@ mixin searchSelect(title, queryName, options, selector)
           option(value='')= `${title}: -`
         for option in options 
           if selector == option.id
-            option(selected='selected' value= option.id)= `${title}: ${option.fullName && option.id == id ? 'me' : option.fullName || option.name}`
+            option(selected='selected' value= option.id)= `${title}: ${option.fullName && option.id == id ? 'you' : option.fullName || option.name}`
           else
-            option(value= option.id)= `${title}: ${option.fullName && option.id == id ? 'me' : option.fullName || option.name}`
+            option(value= option.id)= `${title}: ${option.fullName && option.id == id ? 'you' : option.fullName || option.name}`
 
 
 mixin textarea(f, property, placeholder, content)

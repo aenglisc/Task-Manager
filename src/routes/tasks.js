@@ -4,6 +4,7 @@ export default (router, {
   logger,
   Tag,
   TaskStatus,
+  TaskTag,
   Task,
   User,
 }) => {
@@ -17,9 +18,7 @@ export default (router, {
     router,
     'tasks#show',
     msg,
-    () => Task.findAll({
-      include: [{ model: User, as: 'creator' }],
-    }),
+    () => Task.findAll({ include: [{ model: User, as: 'creator' }] }),
   );
 
   const getTags = rawTagsData =>
@@ -40,8 +39,10 @@ export default (router, {
     .get('tasks#index', '/tasks', async (ctx) => {
       const { query } = ctx.request;
       const users = await User.findAll();
-      const tags = await Tag.findAll();
+      const tags = await Tag.findAll({ include: [{ model: Task }] });
       const statuses = await TaskStatus.findAll();
+
+      logger(tags);
 
       const noQuery = Object.keys(query).length === 0;
 

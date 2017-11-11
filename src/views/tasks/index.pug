@@ -44,7 +44,9 @@ block content
             td.align-middle= task.status.name
             td.align-middle
               row
-                each tag in task.Tags
-                  .d-inline
-                    span
-                      kbd.py-0.my-1= tag.name
+                each tag in tags
+                  each tagTask in tag.Tasks
+                    if tagTask.id == task.id
+                      .d-inline
+                        span
+                          kbd.py-0.my-1= tag.name
