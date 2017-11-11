@@ -4,7 +4,6 @@ export default (router, {
   logger,
   Tag,
   TaskStatus,
-  TaskTag,
   Task,
   User,
 }) => {
