@@ -20,6 +20,13 @@ export default (router, {
     () => Task.findAll({ include: [{ model: User, as: 'creator' }] }),
   );
 
+  const filterModel = (query, dataType, model, as) => {
+    const noQuery = Object.keys(query).length === 0;
+    return noQuery || query[dataType] === '' ?
+      { model, as } :
+      { model, as, where: { id: query[dataType] } };
+  };
+
   const getTags = rawTagsData =>
     rawTagsData.split(',')
       .map(tagName => tagName.trim())
@@ -37,30 +44,19 @@ export default (router, {
   router
     .get('tasks#index', '/tasks', async (ctx) => {
       const { query } = ctx.request;
-      const users = await User.findAll();
-      const tags = await Tag.findAll({ include: [{ model: Task }] });
+
       const statuses = await TaskStatus.findAll();
-
-      logger(tags);
-
-      const noQuery = Object.keys(query).length === 0;
-
+      const tags = await Tag.findAll({ include: [{ model: Task }] });
+      const users = await User.findAll();
       const tasks = await Task.findAll({
         include: [
-          noQuery || query.assignedToId === '' ?
-            { model: User, as: 'assignedTo' } :
-            { model: User, as: 'assignedTo', where: { id: query.assignedToId } },
-          noQuery || query.creatorId === '' ?
-            { model: User, as: 'creator' } :
-            { model: User, as: 'creator', where: { id: query.creatorId } },
-          noQuery || query.statusId === '' ?
-            { model: TaskStatus, as: 'status' } :
-            { model: TaskStatus, as: 'status', where: { id: query.statusId } },
-          noQuery || query.tag === '' ?
-            { model: Tag } :
-            { model: Tag, where: { id: query.tag } },
+          filterModel(query, 'assignedToId', User, 'assignedTo'),
+          filterModel(query, 'creatorId', User, 'creator'),
+          filterModel(query, 'statusId', TaskStatus, 'status'),
+          filterModel(query, 'tag', Tag),
         ],
       });
+
       ctx.render('tasks/index', {
         query,
         statuses,
