@@ -7,16 +7,16 @@ export default (router, {
   Task,
   User,
 }) => {
-  const authoriseCreate = msg => auth(
+  const authoriseCreate = auth(
     router,
     'tasks#index',
-    msg,
+    'A task can only be created by an authorised user',
   );
 
-  const authoriseEdit = msg => auth(
+  const authoriseEdit = auth(
     router,
     'tasks#show',
-    msg,
+    'A task can only be edited by its creator',
     () => Task.findAll({ include: [{ model: User, as: 'creator' }] }),
   );
 
@@ -66,13 +66,13 @@ export default (router, {
       });
     })
 
-    .get('tasks#new', '/tasks/new', authoriseCreate('A task can only be created by an authorised user'), async (ctx) => {
+    .get('tasks#new', '/tasks/new', authoriseCreate, async (ctx) => {
       const task = Task.build();
       const users = await User.findAll();
       ctx.render('tasks/new', { users, f: buildFormObj(task) });
     })
 
-    .post('tasks#create', '/tasks', authoriseCreate('A task can only be created by an authorised user'), async (ctx) => {
+    .post('tasks#create', '/tasks', authoriseCreate, async (ctx) => {
       const { form } = ctx.request.body;
       form.creatorId = ctx.state.id;
 
@@ -109,7 +109,7 @@ export default (router, {
       ctx.render('tasks/show', { task });
     })
 
-    .get('tasks#edit', '/tasks/:id/edit', authoriseEdit('A task can only be edited by its creator'), async (ctx) => {
+    .get('tasks#edit', '/tasks/:id/edit', authoriseEdit, async (ctx) => {
       const task = await getTasks(ctx.params.id);
       const users = await User.findAll();
       const statuses = await TaskStatus.findAll();
@@ -122,7 +122,7 @@ export default (router, {
       });
     })
 
-    .patch('tasks#update', '/tasks/:id', authoriseEdit('A task can only be edited by its creator'), async (ctx) => {
+    .patch('tasks#update', '/tasks/:id', authoriseEdit, async (ctx) => {
       const { form } = ctx.request.body;
       const task = await getTasks(ctx.params.id);
       const { name } = task;
@@ -161,7 +161,7 @@ export default (router, {
       }
     })
 
-    .delete('tasks#destroy', '/tasks/:id', authoriseEdit('A task can only be deleted by its creator'), async (ctx) => {
+    .delete('tasks#destroy', '/tasks/:id', authoriseEdit, async (ctx) => {
       const { name } = await Task.findById(ctx.params.id, {
         include: [{ model: User, as: 'creator' }],
       });

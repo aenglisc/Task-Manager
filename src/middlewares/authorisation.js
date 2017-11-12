@@ -6,7 +6,8 @@ export default (
 ) => async (ctx, next) => {
   const signedIn = ctx.state.isSignedIn();
   if (getItems) {
-    const { id, creator } = (await getItems())[ctx.params.id - 1];
+    const items = await getItems();
+    const { id, creator } = items[ctx.params.id - 1];
     if (signedIn && ctx.state.id === Number(creator ? creator.id : id)) {
       await next();
       return;
