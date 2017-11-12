@@ -2,11 +2,11 @@ export default (
   router,
   redirect,
   msg,
-  getItems,
+  Item,
 ) => async (ctx, next) => {
   const signedIn = ctx.state.isSignedIn();
-  if (getItems) {
-    const item = await getItems().findById(ctx.params.id);
+  if (Item) {
+    const item = await Item.findById(ctx.params.id);
     if (signedIn && ctx.state.id === Number(item.creatorId ? item.creatorId : item.id)) {
       await next();
       return;

@@ -1,6 +1,7 @@
 export default (router, {
   auth,
   buildFormObj,
+  exists,
   logger,
   Tag,
   TaskStatus,
@@ -17,7 +18,13 @@ export default (router, {
     router,
     'tasks#show',
     'A task can only be edited by its creator',
-    () => Task,
+    Task,
+  );
+
+  const taskExists = exists(
+    router,
+    Task,
+    'Task was not found',
   );
 
   const filterModel = (query, dataType, model, as) => {
@@ -106,17 +113,17 @@ export default (router, {
         logger('Unable to create the task:', err);
         form.id = ctx.params.id;
         ctx.flash.set({ type: 'danger', text: 'Unable to create the task', now: true });
-        ctx.render('tasks/new', { users, f: buildFormObj(form, err) });
         ctx.response.status = 422;
+        ctx.render('tasks/new', { users, f: buildFormObj(form, err) });
       }
     })
 
-    .get('tasks#show', '/tasks/:id', async (ctx) => {
+    .get('tasks#show', '/tasks/:id', taskExists, async (ctx) => {
       const task = await getTasks(ctx.params.id);
       ctx.render('tasks/show', { task });
     })
 
-    .get('tasks#edit', '/tasks/:id/edit', authoriseEdit, async (ctx) => {
+    .get('tasks#edit', '/tasks/:id/edit', taskExists, authoriseEdit, async (ctx) => {
       const task = await getTasks(ctx.params.id);
       const users = await User.findAll();
       const statuses = await TaskStatus.findAll();
@@ -129,7 +136,7 @@ export default (router, {
       });
     })
 
-    .patch('tasks#update', '/tasks/:id', authoriseEdit, async (ctx) => {
+    .patch('tasks#update', '/tasks/:id', taskExists, authoriseEdit, async (ctx) => {
       const { form } = ctx.request.body;
       const task = await getTasks(ctx.params.id);
       const { name } = task;
@@ -148,17 +155,17 @@ export default (router, {
         form.status = { id: form.statusId };
         form.assignedTo = { id: form.assignedToId };
         ctx.flash.set({ type: 'danger', text: 'Unable to update the task', now: true });
+        ctx.response.status = 422;
         ctx.render('tasks/edit', {
           name,
           users,
           statuses,
           f: buildFormObj(form, err),
         });
-        ctx.response.status = 422;
       }
     })
 
-    .delete('tasks#destroy', '/tasks/:id', authoriseEdit, async (ctx) => {
+    .delete('tasks#destroy', '/tasks/:id', taskExists, authoriseEdit, async (ctx) => {
       const { name } = await Task.findById(ctx.params.id, {
         include: [{ model: User, as: 'creator' }],
       });

@@ -1,10 +1,23 @@
 export default (router, {
   auth,
+  exists,
   buildFormObj,
   logger,
   User,
 }) => {
-  const authorise = msg => auth(router, 'users#show', msg, () => User);
+  const authorise = action => auth(
+    router,
+    'users#show',
+    `A profile can only be ${action} by its owner`,
+    User,
+  );
+
+  const userExists = exists(
+    router,
+    User,
+    'User was not found',
+  );
+
   router
     .get('users#index', '/users', async (ctx) => {
       const users = await User.findAll();
@@ -16,14 +29,9 @@ export default (router, {
       ctx.render('users/new', { f: buildFormObj(user) });
     })
 
-    .get('users#show', '/users/:id', async (ctx) => {
+    .get('users#show', '/users/:id', userExists, async (ctx) => {
       const user = await User.findById(ctx.params.id);
-      if (user) {
-        ctx.render('users/show', { user });
-      } else {
-        logger(`Unable to find user ${ctx.params.id}`);
-        ctx.throw(404);
-      }
+      ctx.render('users/show', { user });
     })
 
     .post('users#create', '/users', async (ctx) => {
@@ -36,17 +44,17 @@ export default (router, {
       } catch (err) {
         logger('Error encountered', err);
         ctx.flash.set({ type: 'danger', text: 'Unable to sign up', now: true });
-        ctx.render('users/new', { f: buildFormObj(user, err) });
         ctx.response.status = 422;
+        ctx.render('users/new', { f: buildFormObj(user, err) });
       }
     })
 
-    .get('users#edit', '/users/:id/edit', authorise('A profile can only be edited by its owner'), async (ctx) => {
+    .get('users#edit', '/users/:id/edit', userExists, authorise('edited'), async (ctx) => {
       const user = await User.findById(ctx.params.id);
       ctx.render('users/edit', { user, f: buildFormObj(user) });
     })
 
-    .patch('users#update', '/users/:id', authorise('A profile can only be edited by its owner'), async (ctx) => {
+    .patch('users#update', '/users/:id', userExists, authorise('edited'), async (ctx) => {
       const { form } = ctx.request.body;
       const user = await User.findById(ctx.params.id);
       const { firstName, lastName } = user;
@@ -57,12 +65,12 @@ export default (router, {
       } catch (err) {
         logger('Error encountered', err);
         ctx.flash.set({ type: 'danger', text: 'Unable to edit user info', now: true });
-        ctx.render('users/edit', { firstName, lastName, f: buildFormObj(user, err) });
         ctx.response.status = 422;
+        ctx.render('users/edit', { firstName, lastName, f: buildFormObj(user, err) });
       }
     })
 
-    .delete('users#destroy', '/users/:id', authorise('A profile can only be deleted by its owner'), async (ctx) => {
+    .delete('users#destroy', '/users/:id', userExists, authorise('deleted'), async (ctx) => {
       const user = await User.findById(ctx.params.id);
       await User.destroy({ where: { id: ctx.params.id } });
       ctx.session = {};
