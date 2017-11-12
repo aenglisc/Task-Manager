@@ -39,8 +39,8 @@ block content
             td.align-middle
               +formFor(user, { url: urlFor('tasks#show', task.id), method: 'get' })
                 button.btn.btn-outline-info.btn-block(type='submit')= `${task.name}`
-            td.align-middle= task.creator.fullName
-            td.align-middle= task.assignedTo.fullName
+            td.align-middle= id == task.creator.id ? 'You' : task.creator.fullName
+            td.align-middle= id == task.assignedTo.id ? 'You' : task.assignedTo.fullName
             td.align-middle= task.status.name
             td.align-middle
               row

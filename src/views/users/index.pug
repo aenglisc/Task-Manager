@@ -15,7 +15,7 @@ block content
           tr
             td
               +formFor(user, { url: urlFor('users#show', user.id) })
-                button.btn.btn-outline-info.btn-block(type='submit')= user.fullName
+                button.btn.btn-outline-info.btn-block(type='submit')= id == user.id ? `${user.fullName} (You)` : user.fullName
             td.align-middle= user.email
             td.align-middle= user.createdAt.toLocaleString()
 

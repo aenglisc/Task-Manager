@@ -8,6 +8,6 @@ block content
     .row.mt-3
       .col-sm-6.mx-auto
         +formFor(f, { url: urlFor('sessions#create'), method: 'post' })
-          +input(f, 'email', 'E-mail')
+          +input(f, 'email', 'E-mail', { as: 'email' })
           +input(f, 'password', 'Password', { as: 'password' })
           +button(f, 'Sign in')
