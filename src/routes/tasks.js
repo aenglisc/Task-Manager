@@ -49,6 +49,9 @@ export default (router, {
       const tags = await Tag.findAll({ include: [{ model: Task }] });
       const users = await User.findAll();
       const tasks = await Task.findAll({
+        order: [
+          ['id', 'ASC'],
+        ],
         include: [
           filterModel(query, 'assignedToId', User, 'assignedTo'),
           filterModel(query, 'creatorId', User, 'creator'),
