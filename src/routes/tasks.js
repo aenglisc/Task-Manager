@@ -17,7 +17,7 @@ export default (router, {
     router,
     'tasks#show',
     'A task can only be edited by its creator',
-    () => Task.findAll({ include: [{ model: User, as: 'creator' }] }),
+    () => Task.findAll(),
   );
 
   const filterModel = (query, dataType, model, as) => {

@@ -7,8 +7,8 @@ export default (
   const signedIn = ctx.state.isSignedIn();
   if (getItems) {
     const items = await getItems();
-    const { id, creator } = items[ctx.params.id - 1];
-    if (signedIn && ctx.state.id === Number(creator ? creator.id : id)) {
+    const item = items[ctx.params.id - 1];
+    if (signedIn && ctx.state.id === Number(item.creatorId ? item.creatorId : item.id)) {
       await next();
       return;
     }
