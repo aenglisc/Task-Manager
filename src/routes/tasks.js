@@ -122,7 +122,7 @@ export default (router, {
       }
     })
 
-    .get('tasks#show', '/tasks/:id', taskExists, async (ctx) => {
+    .get('tasks#show', '/tasks/:id', deleteOldTags(), taskExists, async (ctx) => {
       const task = await getTasks(ctx.params.id);
       ctx.render('tasks/show', { task });
     })
