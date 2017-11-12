@@ -41,6 +41,20 @@ export default (router, {
     ],
   });
 
+  const updateTags = (tags, task) => {
+    if (tags.length > 0) {
+      Promise.all(tags.map(async (tagName) => {
+        const tag = await Tag.findOne({ where: { name: tagName } });
+        if (tag) {
+          await task.addTags(tag);
+        } else {
+          const addTag = await Tag.create({ name: tagName });
+          await task.addTags(addTag);
+        }
+      }));
+    }
+  };
+
   router
     .get('tasks#index', '/tasks', async (ctx) => {
       const { query } = ctx.request;
@@ -84,17 +98,7 @@ export default (router, {
       const users = await User.findAll();
 
       try {
-        if (tags.length > 0) {
-          Promise.all(tags.map(async (tagName) => {
-            const tag = await Tag.findOne({ where: { name: tagName } });
-            if (tag) {
-              await task.addTags(tag);
-            } else {
-              const addTag = await Tag.create({ name: tagName });
-              await task.addTags(addTag);
-            }
-          }));
-        }
+        await updateTags(tags, task);
         await task.save();
         ctx.flash.set({ type: 'success', text: `${form.name} has been created` });
         await ctx.redirect(router.url('tasks#show', task.dataValues.id));
@@ -132,17 +136,7 @@ export default (router, {
       const tags = await getTags(form.tags);
       await task.setTags([]);
       try {
-        if (tags.length > 0) {
-          Promise.all(tags.map(async (tagName) => {
-            const tag = await Tag.findOne({ where: { name: tagName } });
-            if (tag) {
-              await task.addTags(tag);
-            } else {
-              const addTag = await Tag.create({ name: tagName });
-              await task.addTags(addTag);
-            }
-          }));
-        }
+        await updateTags(tags, task);
         await task.update(form, { where: { id: ctx.params.id } });
         ctx.flash.set({ type: 'success', text: 'The task has been updated' });
         ctx.redirect(router.url('tasks#edit', ctx.params.id));
