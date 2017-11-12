@@ -4,7 +4,7 @@ export default (router, {
   logger,
   User,
 }) => {
-  const authorise = msg => auth(router, 'users#show', msg, () => User.findAll());
+  const authorise = msg => auth(router, 'users#show', msg, () => User);
   router
     .get('users#index', '/users', async (ctx) => {
       const users = await User.findAll();
