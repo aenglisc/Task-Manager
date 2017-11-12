@@ -48,22 +48,26 @@ export default (router, {
     ],
   });
 
-  const updateTags = (tags, task) => {
+  const updateTags = async (tags, task) => {
     if (tags.length > 0) {
-      Promise.all(tags.map(async (tagName) => {
-        const tag = await Tag.findOne({ where: { name: tagName } });
-        if (tag) {
-          await task.addTags(tag);
-        } else {
-          const addTag = await Tag.create({ name: tagName });
-          await task.addTags(addTag);
-        }
-      }));
+      await tags.map(tag => Tag
+        .findOne({ where: { name: tag } })
+        .then(async result => (await result ?
+          task.addTag(result) :
+          task.createTag({ name: tag }))));
     }
   };
 
+  const deleteOldTags = () => async (ctx, next) => {
+    const tagsToRemove = await Tag.findAll({ include: [{ model: Task }] })
+      .filter(tag => tag.Tasks.length === 0)
+      .map(tag => tag.id);
+    await Tag.destroy({ where: { id: tagsToRemove } });
+    await next();
+  };
+
   router
-    .get('tasks#index', '/tasks', async (ctx) => {
+    .get('tasks#index', '/tasks', deleteOldTags(), async (ctx) => {
       const { query } = ctx.request;
 
       const statuses = await TaskStatus.findAll();
@@ -123,7 +127,7 @@ export default (router, {
       ctx.render('tasks/show', { task });
     })
 
-    .get('tasks#edit', '/tasks/:id/edit', taskExists, authoriseEdit, async (ctx) => {
+    .get('tasks#edit', '/tasks/:id/edit', deleteOldTags(), taskExists, authoriseEdit, async (ctx) => {
       const task = await getTasks(ctx.params.id);
       const users = await User.findAll();
       const statuses = await TaskStatus.findAll();
@@ -170,6 +174,7 @@ export default (router, {
         include: [{ model: User, as: 'creator' }],
       });
       await Task.destroy({ where: { id: ctx.params.id } });
+      await deleteOldTags();
       ctx.flash.set({ type: 'success', text: `${name} has been deleted` });
       ctx.redirect(router.url('tasks#index'));
     });
