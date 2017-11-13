@@ -24,7 +24,7 @@ const task = {
   assignedToId: 1,
   statusId: 1,
   description: faker.lorem.words(),
-  tags: `${faker.lorem.word()}, ${faker.lorem.word()}`,
+  tags: 'a, b',
 };
 
 const taskUpdated = {
@@ -32,7 +32,7 @@ const taskUpdated = {
   assignedToId: 1,
   statusId: 2,
   description: faker.lorem.words(),
-  tags: `${faker.lorem.word()}, ${faker.lorem.word()}`,
+  tags: 'c, d',
 };
 
 describe('Basic', () => {
