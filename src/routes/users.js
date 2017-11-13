@@ -43,7 +43,10 @@ export default (router, {
         ctx.redirect(router.url('users#show', user.dataValues.id));
       } catch (err) {
         logger('Error encountered', err);
-        ctx.flash.set({ type: 'danger', text: 'Unable to sign up', now: true });
+        const notUniqueMessage = err.errors
+          .filter(e => e.type === 'unique violation')
+          .map(e => e.message);
+        ctx.flash.set({ type: 'danger', text: notUniqueMessage || 'Unable to sign up', now: true });
         ctx.response.status = 422;
         ctx.render('users/new', { f: buildFormObj(user, err) });
       }
@@ -64,7 +67,10 @@ export default (router, {
         ctx.render('users/edit', { user, f: buildFormObj(user) });
       } catch (err) {
         logger('Error encountered', err);
-        ctx.flash.set({ type: 'danger', text: 'Unable to edit user info', now: true });
+        const notUniqueMessage = err.errors
+          .filter(e => e.type === 'unique violation')
+          .map(e => e.message);
+        ctx.flash.set({ type: 'danger', text: notUniqueMessage || 'Unable to sign up', now: true });
         ctx.response.status = 422;
         ctx.render('users/edit', { firstName, lastName, f: buildFormObj(user, err) });
       }
