@@ -19,11 +19,26 @@ const userUpdated = {
   lastName: faker.name.lastName(),
 };
 
+const userEmpty = {
+  email: '',
+  password: '',
+  firstName: '',
+  lastName: '',
+};
+
 const task = {
   name: faker.lorem.word(),
   assignedToId: 1,
   statusId: 1,
   description: faker.lorem.words(),
+  tags: '',
+};
+
+const taskEmpty = {
+  name: '',
+  assignedToId: 0,
+  statusId: 1,
+  description: '',
   tags: '',
 };
 
@@ -74,12 +89,22 @@ describe('User session', () => {
   it('Sign up', async () => {
     await request
       .agent(server)
+      .get('/users/new')
+      .expect(200);
+
+    await request
+      .agent(server)
       .post('/users')
       .send({ form: { ...user } })
       .expect(302);
   });
 
   it('Sign in', async () => {
+    await request
+      .agent(server)
+      .get('/sessions/new')
+      .expect(200);
+
     await request
       .agent(server)
       .post('/sessions')
@@ -98,6 +123,14 @@ describe('User session', () => {
       .delete('/sessions')
       .expect(302);
   });
+
+  it('Sign in: error', async () => {
+    await request
+      .agent(server)
+      .post('/sessions')
+      .send({ form: { ...userUpdated } })
+      .expect(422);
+  });
 });
 
 describe('CRUD - Users', () => {
@@ -113,22 +146,36 @@ describe('CRUD - Users', () => {
     done();
   });
 
-  it('No user', async () => {
+  it('C: Create user', async () => {
     await request
       .agent(server)
-      .get('/users/1')
-      .expect(404);
-  });
+      .get('/users/new')
+      .expect(200);
 
-  it('C: Create user', async () => {
     await request
       .agent(server)
       .post('/users')
       .send({ form: { ...user } })
       .expect(302);
+
+    await request
+      .agent(server)
+      .post('/users')
+      .send({ form: { ...userEmpty } })
+      .expect(422);
   });
 
   it('R: Read user', async () => {
+    await request
+      .agent(server)
+      .get('/users')
+      .expect(200);
+
+    await request
+      .agent(server)
+      .get('/users/1')
+      .expect(200);
+
     await request
       .agent(server)
       .get('/users/1/edit')
@@ -148,6 +195,11 @@ describe('CRUD - Users', () => {
       .agent(server)
       .delete('/users/1')
       .expect(302);
+
+    await request
+      .agent(server)
+      .delete('/users/5')
+      .expect(404);
   });
 });
 
@@ -182,13 +234,35 @@ describe('CRUD - Tasks', () => {
 
     await request
       .agent(server)
+      .get('/tasks/new')
+      .expect(302);
+
+    await request
+      .agent(server)
       .post('/tasks')
       .set('Cookie', cookie)
       .send({ form: { ...task } })
       .expect(302);
+
+    await request
+      .agent(server)
+      .post('/tasks')
+      .set('Cookie', cookie)
+      .send({ form: { ...taskEmpty } })
+      .expect(422);
   });
 
   it('R: Read task', async () => {
+    await request
+      .agent(server)
+      .get('/tasks')
+      .expect(200);
+
+    await request
+      .agent(server)
+      .get('/tasks/1')
+      .expect(200);
+
     await request
       .agent(server)
       .get('/tasks/1/edit')
@@ -208,6 +282,11 @@ describe('CRUD - Tasks', () => {
       .agent(server)
       .delete('/tasks/1')
       .expect(302);
+
+    await request
+      .agent(server)
+      .delete('/tasks/5')
+      .expect(404);
   });
 });
 
