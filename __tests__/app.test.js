@@ -1,5 +1,3 @@
-/* eslint object-curly-newline: ["error", { "minProperties": 5 }] */
-
 import request from 'supertest';
 import matchers from 'jest-supertest-matchers';
 import faker from 'faker';
@@ -7,13 +5,35 @@ import faker from 'faker';
 import app from '../src';
 import init from '../src/init';
 
-const createUser = id => ({
-  id,
+const user = {
   email: faker.internet.email(),
+  password: faker.internet.password(),
   firstName: faker.name.firstName(),
   lastName: faker.name.lastName(),
+};
+
+const userUpdated = {
+  email: faker.internet.email(),
   password: faker.internet.password(),
-});
+  firstName: faker.name.firstName(),
+  lastName: faker.name.lastName(),
+};
+
+const task = {
+  name: faker.lorem.word(),
+  assignedToId: 1,
+  statusId: 1,
+  description: faker.lorem.words(),
+  tags: `${faker.lorem.word()}, ${faker.lorem.word()}`,
+};
+
+const taskUpdated = {
+  name: faker.lorem.word(),
+  assignedToId: 1,
+  statusId: 2,
+  description: faker.lorem.words(),
+  tags: `${faker.lorem.word()}, ${faker.lorem.word()}`,
+};
 
 describe('Basic', () => {
   const server = app().listen();
@@ -39,7 +59,6 @@ describe('Basic', () => {
 });
 
 describe('User session', () => {
-  const { email, firstName, lastName, password } = createUser(1);
   const server = app().listen();
 
   beforeAll(async () => {
@@ -56,8 +75,7 @@ describe('User session', () => {
     await request
       .agent(server)
       .post('/users')
-      .type('form')
-      .send({ form: { email, firstName, lastName, password } })
+      .send({ form: { ...user } })
       .expect(302);
   });
 
@@ -65,8 +83,7 @@ describe('User session', () => {
     await request
       .agent(server)
       .post('/sessions')
-      .type('form')
-      .send({ form: { email, password } })
+      .send({ form: { ...user } })
       .expect(302);
   });
 
@@ -74,8 +91,7 @@ describe('User session', () => {
     await request
       .agent(server)
       .post('/sessions')
-      .type('form')
-      .send({ form: { email, password } })
+      .send({ form: { ...user } })
       .expect(302);
     await request
       .agent(server)
@@ -83,3 +99,109 @@ describe('User session', () => {
       .expect(302);
   });
 });
+
+
+describe('CRUD - Users', () => {
+  const server = app().listen();
+
+  beforeAll(async () => {
+    jasmine.addMatchers(matchers);
+    await init();
+  });
+
+  afterAll((done) => {
+    server.close();
+    done();
+  });
+
+  it('C: Create user', async () => {
+    await request
+      .agent(server)
+      .post('/users')
+      .send({ form: { ...user } })
+      .expect(302);
+  });
+
+  it('R: Read user', async () => {
+    await request
+      .agent(server)
+      .get('/users/1')
+      .expect(200);
+  });
+
+  it('U: Update user', async () => {
+    await request
+      .agent(server)
+      .patch('/users/1')
+      .send({ form: { ...userUpdated } })
+      .expect(302);
+  });
+
+  it('D: Delete user', async () => {
+    await request
+      .agent(server)
+      .delete('/users/1')
+      .expect(302);
+  });
+});
+
+describe('CRUD - Tasks', () => {
+  const server = app().listen();
+  init();
+
+  beforeAll(async () => {
+    jasmine.addMatchers(matchers);
+  });
+
+  afterAll((done) => {
+    server.close();
+    done();
+  });
+
+  it('C: Create task', async () => {
+    await request
+      .agent(server)
+      .post('/users')
+      .send({ form: { ...user } });
+
+    const auth = await request
+      .agent(server)
+      .post('/sessions')
+      .send({ form: { ...user } });
+
+    const cookies = auth.headers['set-cookie'][0]
+      .split(',')
+      .map(item => item.split(';')[0]);
+    const cookie = cookies.join(';');
+
+    await request
+      .agent(server)
+      .post('/tasks')
+      .set('Cookie', cookie)
+      .send({ form: { ...task } })
+      .expect(302);
+  });
+
+  it('R: Read task', async () => {
+    await request
+      .agent(server)
+      .get('/tasks/1')
+      .expect(200);
+  });
+
+  it('U: Update task', async () => {
+    await request
+      .agent(server)
+      .patch('/tasks/1')
+      .send({ form: { ...taskUpdated } })
+      .expect(302);
+  });
+
+  it('D: Delete task', async () => {
+    await request
+      .agent(server)
+      .delete('/tasks/1')
+      .expect(302);
+  });
+});
+
