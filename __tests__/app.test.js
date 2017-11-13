@@ -24,7 +24,7 @@ const task = {
   assignedToId: 1,
   statusId: 1,
   description: faker.lorem.words(),
-  tags: 'a, b',
+  tags: '',
 };
 
 const taskUpdated = {
@@ -32,7 +32,7 @@ const taskUpdated = {
   assignedToId: 1,
   statusId: 2,
   description: faker.lorem.words(),
-  tags: 'c, d',
+  tags: '',
 };
 
 describe('Basic', () => {
@@ -99,7 +99,6 @@ describe('User session', () => {
       .expect(302);
   });
 });
-
 
 describe('CRUD - Users', () => {
   const server = app().listen();
