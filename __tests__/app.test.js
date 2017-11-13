@@ -114,6 +114,13 @@ describe('CRUD - Users', () => {
     done();
   });
 
+  it('No user', async () => {
+    await request
+      .agent(server)
+      .get('/users/1')
+      .expect(404);
+  });
+
   it('C: Create user', async () => {
     await request
       .agent(server)
@@ -125,8 +132,8 @@ describe('CRUD - Users', () => {
   it('R: Read user', async () => {
     await request
       .agent(server)
-      .get('/users/1')
-      .expect(200);
+      .get('/users/1/edit')
+      .expect(302);
   });
 
   it('U: Update user', async () => {
@@ -185,8 +192,8 @@ describe('CRUD - Tasks', () => {
   it('R: Read task', async () => {
     await request
       .agent(server)
-      .get('/tasks/1')
-      .expect(200);
+      .get('/tasks/1/edit')
+      .expect(302);
   });
 
   it('U: Update task', async () => {
