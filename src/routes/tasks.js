@@ -115,10 +115,9 @@ export default (router, {
         await ctx.redirect(router.url('tasks#show', task.dataValues.id));
       } catch (err) {
         logger('Unable to create the task:', err);
-        form.id = ctx.params.id;
         ctx.flash.set({ type: 'danger', text: 'Unable to create the task', now: true });
         ctx.response.status = 422;
-        ctx.render('tasks/new', { users, f: buildFormObj(form, err) });
+        ctx.render('tasks/new', { users, f: buildFormObj({ ...form, id: ctx.params.id }, err) });
       }
     })
 
@@ -155,16 +154,13 @@ export default (router, {
         logger('Unable to edit the task:', err);
         const users = await User.findAll();
         const statuses = await TaskStatus.findAll();
-        form.id = ctx.params.id;
-        form.status = { id: form.statusId };
-        form.assignedTo = { id: form.assignedToId };
         ctx.flash.set({ type: 'danger', text: 'Unable to update the task', now: true });
         ctx.response.status = 422;
         ctx.render('tasks/edit', {
           name,
           users,
           statuses,
-          f: buildFormObj(form, err),
+          f: buildFormObj({ ...form, id: ctx.params.id }, err),
         });
       }
     })

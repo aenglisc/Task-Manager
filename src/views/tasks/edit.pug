@@ -9,8 +9,8 @@ block content
       .col-sm-6.mx-auto
         +formFor(f, { url: urlFor('tasks#update', f.object.id), method: 'patch'})
           +input(f, 'name', 'Input a name for your task')
-          +selectStatus(f, 'statusId', statuses, f.object.status.id)
-          +selectUser(f, 'assignedToId', users, f.object.assignedTo.id)
+          +selectStatus(f, 'statusId', statuses, f.object.statusId)
+          +selectUser(f, 'assignedToId', users, f.object.assignedToId)
           +textarea(f, 'description', 'Describe the task', f.object.description)
           +input(f, 'tags', 'Input a comma separated list of tags')
           button.btn.btn-outline-primary.btn-block.mt-2(type='submit')= 'Update'
