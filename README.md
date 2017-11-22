@@ -7,7 +7,7 @@ This is a simple task manager app using Koa and PostgreSQL via Sequelize.
 [Live version on Heroku](https://task-manager-by-roman.herokuapp.com)
 
 Functionality:
-- User CRUD
+- Users CRUD
 - Authorisation
 - Tasks CRUD
 - Task filtering
