@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/aenglisc/project-lvl4-s119.svg?branch=master)](https://travis-ci.org/aenglisc/project-lvl4-s119)
 
 This is a simple task manager app using Koa and PostgreSQL via Sequelize.
+
 [Live version on Heroku](https://task-manager-by-roman.herokuapp.com)
 
 Functionality:
@@ -13,4 +14,5 @@ Functionality:
 - Task filtering
 
 Users can only edit and delete themselves
+
 Tasks can only be edited and deleted by their creators
